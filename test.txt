@@ -1,0 +1,5 @@
+# Test Dosyası
+
+Bu dosya GitHub güncelleme testini yapmak için oluşturuldu.
+
+Tarih: 2026-01-10
