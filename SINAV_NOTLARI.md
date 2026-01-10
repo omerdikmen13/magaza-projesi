@@ -20,7 +20,7 @@ git commit -m "ilk commit"
 git branch -M main
 
 # 5. GitHub repo bağla
-git remote add origin https://github.com/KULLANICI/REPO.git
+git remote add origin https://github.com/omerdikmen13/magaza-projesi.git
 
 # 6. GitHub'a gönder
 git push -u origin main

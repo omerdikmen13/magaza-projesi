@@ -1,0 +1,5 @@
+Bu bir deneme dosyasıdır.
+
+Git güncelleme testi için oluşturuldu.
+
+Tarih: 2026-01-10 04:28
