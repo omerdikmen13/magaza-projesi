@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .login-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .login-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--gray-500);
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .login-tab:hover {
+            color: var(--primary-color);
+            background: var(--gray-50);
+        }
+
+        .login-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .login-form-container {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .login-form-container.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a th:href="@{/}" style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-store"></i> Mağaza Sistemi
+            </a>
+        </div>
+        <div class="navbar-nav">
+            <a th:href="@{/uye-ol}" class="nav-link">Üye Ol</a>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-card" style="width: 500px; max-width: 95%;">
+
+            <!-- TABS -->
+            <div class="login-tabs">
+                <div class="login-tab active" onclick="switchTab('musteri')">
+                    <i class="fas fa-user"></i> Müşteri
+                </div>
+                <div class="login-tab" onclick="switchTab('magaza')">
+                    <i class="fas fa-store"></i> Mağaza
+                </div>
+                <div class="login-tab" onclick="switchTab('admin')">
+                    <i class="fas fa-shield-alt"></i> Admin
+                </div>
+            </div>
+
+            <!-- ORTAK MESAJLAR -->
+            <div th:if="${param.error}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> Kullanıcı adı veya şifre hatalı!
+            </div>
+            <div th:if="${hata}" class="alert alert-error">
+                <i class="fas fa-exclamation-triangle"></i> <span th:text="${hata}"></span>
+            </div>
+            <div th:if="${param.kayit}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> Kayıt başarılı! Giriş yapabilirsiniz.
+            </div>
+
+            <!-- MÜŞTERİ FORM -->
+            <div id="musteri" class="login-form-container active">
+                <div class="auth-header">
+                    <h1>Müşteri Girişi</h1>
+                    <p>Alışveriş yapmak için giriş yapın</p>
+                </div>
+                <form th:action="@{/auth/giris}" method="post">
+                    <input type="hidden" name="rol" value="MUSTERI">
+                    <div class="form-group">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input class="form-control" type="text" name="kullaniciAdi" placeholder="Müşteri adınız"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Şifre</label>
+                        <input class="form-control" type="password" name="sifre" placeholder="******" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                    </button>
+                </form>
+                <div
+                    style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gray-200);">
+                    <span style="color: var(--gray-500);">Hesabın yok mu?</span>
+                    <a th:href="@{/uye-ol}"
+                        style="color: var(--primary-color); font-weight: 600; margin-left: 5px;">Kaydol</a>
+                </div>
+            </div>
+
+            <!-- MAĞAZA FORM -->
+            <div id="magaza" class="login-form-container">
+                <div class="auth-header">
+                    <h1>Mağaza Yöneticisi</h1>
+                    <p>Mağazanızı yönetmek için giriş yapın</p>
+                </div>
+                <form th:action="@{/auth/giris}" method="post">
+                    <input type="hidden" name="rol" value="MAGAZA_SAHIBI">
+                    <div class="form-group">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input class="form-control" type="text" name="kullaniciAdi"
+                            placeholder="Mağaza kullanıcı adınız" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Şifre</label>
+                        <input class="form-control" type="password" name="sifre" placeholder="******" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                    </button>
+                </form>
+                <div
+                    style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--gray-200);">
+                    <span style="color: var(--gray-500);">Hesabın yok mu?</span>
+                    <a th:href="@{/uye-ol}"
+                        style="color: var(--primary-color); font-weight: 600; margin-left: 5px;">Kaydol</a>
+                </div>
+            </div>
+
+            <!-- ADMIN FORM -->
+            <div id="admin" class="login-form-container">
+                <div class="auth-header">
+                    <h1>Yönetici Girişi</h1>
+                    <p>Sistem yönetimi için giriş yapın</p>
+                </div>
+                <form th:action="@{/auth/giris}" method="post">
+                    <input type="hidden" name="rol" value="ADMIN">
+                    <div class="form-group">
+                        <label class="form-label">Kullanıcı Adı</label>
+                        <input class="form-control" type="text" name="kullaniciAdi" placeholder="Admin kullanıcı adınız"
+                            required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Şifre</label>
+                        <input class="form-control" type="password" name="sifre" placeholder="******" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                        <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchTab(tabId) {
+            // Remove active class from all tabs and forms
+            document.querySelectorAll('.login-tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.login-form-container').forEach(f => f.classList.remove('active'));
+
+            // Add active class to clicked tab
+            event.currentTarget.classList.add('active');
+
+            // Show corresponding form
+            document.getElementById(tabId).classList.add('active');
+        }
+    </script>
+
+</body>
+
+</html>

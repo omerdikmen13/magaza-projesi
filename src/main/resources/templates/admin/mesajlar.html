@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohbetler - Admin</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <a th:href="@{/admin}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Admin Paneline Dön
+            </a>
+
+            <div class="page-header" style="margin: 20px 0 30px;">
+                <h1><i class="fas fa-comments"></i> Sohbet Yönetimi</h1>
+                <p>Müşteri ve mağazalar arasındaki iletişimleri yönetin</p>
+            </div>
+
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                    <h2 style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-inbox text-gradient"></i> Tüm Sohbetler
+                        <span class="badge badge-primary" th:text="${#lists.size(sohbetler)} + ' sohbet'">0</span>
+                    </h2>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--gray-100);">
+                                <th style="padding: 16px; text-align: left;">Mağaza</th>
+                                <th style="padding: 16px; text-align: left;">Müşteri</th>
+                                <th style="padding: 16px; text-align: left;">Son Mesaj</th>
+                                <th style="padding: 16px; text-align: right;">Tarih</th>
+                                <th style="padding: 16px; text-align: center;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="s : ${sohbetler}" style="border-bottom: 1px solid var(--gray-200);">
+                                <td style="padding: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;"
+                                            th:text="${#strings.substring(s.magaza.ad, 0, 1)}">M</div>
+                                        <div>
+                                            <div style="font-weight: 600;" th:text="${s.magaza.ad}">Mağaza</div>
+                                            <div style="font-size: 0.8rem; color: var(--gray-500);"
+                                                th:text="${s.magaza.sahip.kullaniciAdi}">Sahip</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div
+                                            style="width: 40px; height: 40px; background: var(--success-color); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <div style="font-weight: 600;"
+                                                th:text="${s.musteri.ad + ' ' + s.musteri.soyad}">Ad Soyad</div>
+                                            <div style="font-size: 0.8rem; color: var(--gray-500);"
+                                                th:text="${s.musteri.email}">email</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td style="padding: 16px; color: var(--gray-600); max-width: 300px;">
+                                    <div style="font-weight: 600; font-size: 0.8rem; margin-bottom: 4px;"
+                                        th:text="${s.sonMesaj.gonderenMusteri ? 'Müşteri:' : 'Mağaza:'}">Kim:</div>
+                                    <div style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                        th:text="${s.sonMesaj.icerik}">İçerik...</div>
+                                </td>
+                                <td style="padding: 16px; text-align: right; color: var(--gray-500);"
+                                    th:text="${#temporals.format(s.sonMesaj.tarih, 'dd.MM.yyyy HH:mm')}">Tarih</td>
+                                <td style="padding: 16px; text-align: center;">
+                                    <a th:href="@{/admin/sohbet/magaza/{mid}/musteri/{uid}(mid=${s.magaza.id}, uid=${s.musteri.id})}"
+                                        class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> Sohbeti Gör
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div th:if="${sohbetler.empty}" style="padding: 60px; text-align: center; color: var(--gray-500);">
+                    <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h3>Henüz başlatılmış bir sohbet yok</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

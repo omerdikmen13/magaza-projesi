@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kullanıcı Düzenle (Admin) - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page" style="max-width: 800px; margin: 0 auto;">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/admin/kullanicilar}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Kullanıcılara Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="text-align: center; margin-bottom: 40px;">
+                <h1><i class="fas fa-user-edit"></i> Kullanıcı Düzenle</h1>
+                <p>Kullanıcı profil bilgilerini güncelliyorsunuz</p>
+            </div>
+
+            <!-- FORM -->
+            <div class="card" style="padding: 40px;">
+                <form th:action="@{/admin/kullanici/{id}/duzenle(id=${duzenlenecekKullanici.id})}" method="post">
+
+                    <div class="grid-2" style="gap: 20px;">
+                        <div class="form-group">
+                            <label class="form-label">Ad</label>
+                            <input type="text" name="ad" class="form-control" th:value="${duzenlenecekKullanici.ad}"
+                                required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Soyad</label>
+                            <input type="text" name="soyad" class="form-control"
+                                th:value="${duzenlenecekKullanici.soyad}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" name="email" class="form-control" th:value="${duzenlenecekKullanici.email}"
+                            required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Telefon</label>
+                        <input type="text" name="telefon" class="form-control"
+                            th:value="${duzenlenecekKullanici.telefon}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Mevcut Rol</label>
+                        <input type="text" class="form-control" th:value="${duzenlenecekKullanici.rol}" disabled
+                            style="background: var(--gray-100);">
+                        <small style="color: var(--gray-500);">Rol değişikliğini kullanıcı listesinden yapınız.</small>
+                    </div>
+
+                    <div style="margin-top: 30px; display: grid; gap: 15px;">
+                        <button type="submit" class="btn btn-primary" style="padding: 14px;">
+                            <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                        </button>
+
+                        <a th:href="@{/admin/kullanicilar}" class="btn btn-secondary" style="text-align: center;">
+                            İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

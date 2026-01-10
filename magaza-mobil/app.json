@@ -1,0 +1,50 @@
+{
+  "expo": {
+    "name": "magaza-mobil",
+    "slug": "magaza-mobil",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "magazamobil",
+    "userInterfaceStyle": "automatic",
+    "runtimeVersion": {
+      "policy": "nativeVersion"
+    },
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "updates": {
+      "enabled": false,
+      "checkAutomatically": "ON_ERROR_RECOVERY",
+      "fallbackToCacheTimeout": 0
+    },
+    "extra": {
+      "apiUrl": "https://computative-signe-tidily.ngrok-free.dev"
+    }
+  }
+}

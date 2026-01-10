@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Üye Ol - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a th:href="@{/}" style="display: flex; align-items: center; gap: 10px;">
+                <i class="fas fa-store"></i> Mağaza Sistemi
+            </a>
+        </div>
+        <div class="navbar-nav">
+            <a th:href="@{/giris}" class="nav-link">Giriş Yap</a>
+        </div>
+    </nav>
+
+    <div class="auth-wrapper">
+        <div class="auth-card">
+            <div class="auth-header">
+                <h1>Üye Ol</h1>
+                <p>Yeni hesap oluşturun</p>
+            </div>
+
+            <div th:if="${hata}" class="alert alert-error">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${hata}"></span>
+            </div>
+
+            <form th:action="@{/uye-ol}" method="post">
+
+                <div class="form-group">
+                    <label class="form-label" for="kullaniciAdi">Kullanıcı Adı *</label>
+                    <input id="kullaniciAdi" class="form-control" type="text" name="kullaniciAdi"
+                        placeholder="Örn: ahmet123" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email *</label>
+                    <input id="email" class="form-control" type="email" name="email" placeholder="ornek@email.com"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="ad">Ad</label>
+                    <input id="ad" class="form-control" type="text" name="ad" placeholder="Ad">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="soyad">Soyad</label>
+                    <input id="soyad" class="form-control" type="text" name="soyad" placeholder="Soyad">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="sifre">Şifre *</label>
+                    <input id="sifre" class="form-control" type="password" name="sifre" placeholder="******" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="rol">Hesap Türü *</label>
+                    <select id="rol" class="form-control" name="rol" required>
+                        <option value="MUSTERI">Müşteri</option>
+                        <option value="MAGAZA_SAHIBI">Mağaza Sahibi</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 10px;">
+                    <i class="fas fa-user-plus"></i> Üye Ol
+                </button>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <span style="font-size: 0.9rem; color: var(--text-muted);">Zaten hesabınız var mı? </span>
+                    <a th:href="@{/giris}"
+                        style="font-size: 0.9rem; color: var(--primary-color); font-weight: 600;">Giriş Yap</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+</body>
+
+</html>

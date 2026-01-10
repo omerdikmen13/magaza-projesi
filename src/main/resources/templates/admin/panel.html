@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .admin-header {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-5px);
+        }
+
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-label {
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .quick-links {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 40px;
+        }
+
+        .quick-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 20px;
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .quick-link:hover {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
+        }
+
+        .quick-link i {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- ADMIN HEADER -->
+            <div class="admin-header">
+                <h1><i class="fas fa-shield-alt"></i> Admin Paneli</h1>
+                <p>Sistem yönetimi ve kontrol merkezi</p>
+            </div>
+
+            <!-- STATS GRID -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon"
+                        style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); color: #667eea;">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number" th:text="${toplamKullanici}">0</div>
+                    <div class="stat-label">Toplam Kullanıcı</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"
+                        style="background: linear-gradient(135deg, #00b89420 0%, #55efc420 100%); color: #00b894;">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <div class="stat-number" th:text="${toplamMagaza}">0</div>
+                    <div class="stat-label">Toplam Mağaza</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"
+                        style="background: linear-gradient(135deg, #e1705620 0%, #f5af1920 100%); color: #e17056;">
+                        <i class="fas fa-box"></i>
+                    </div>
+                    <div class="stat-number" th:text="${toplamSiparis}">0</div>
+                    <div class="stat-label">Toplam Sipariş</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon"
+                        style="background: linear-gradient(135deg, #6c5ce720 0%, #a29bfe20 100%); color: #6c5ce7;">
+                        <i class="fas fa-lira-sign"></i>
+                    </div>
+                    <div class="stat-number" th:text="${#numbers.formatDecimal(toplamCiro, 0, 2)}">0</div>
+                    <div class="stat-label">Toplam Ciro (TL)</div>
+                </div>
+            </div>
+
+            <!-- BEKLEYEN SİPARİŞ UYARISI -->
+            <div th:if="${bekleyenSiparis > 0}" class="alert"
+                style="background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%); border: 2px solid #e65100; margin-bottom: 30px;">
+                <i class="fas fa-exclamation-triangle" style="color: #e65100; font-size: 1.2rem;"></i>
+                <span style="color: #e65100; font-weight: 600;">
+                    <span th:text="${bekleyenSiparis}">0</span> adet onay bekleyen sipariş var!
+                    <a th:href="@{/admin/siparisler(durum='BEKLEMEDE')}"
+                        style="color: #e65100; text-decoration: underline;">Siparişleri Görüntüle →</a>
+                </span>
+            </div>
+
+            <!-- QUICK LINKS -->
+            <h2 style="margin-bottom: 20px; display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-bolt text-gradient"></i> Hızlı Erişim
+            </h2>
+            <div class="quick-links">
+                <a th:href="@{/admin/kullanicilar}" class="quick-link">
+                    <i class="fas fa-users"></i>
+                    <span>Kullanıcı Yönetimi</span>
+                </a>
+                <a th:href="@{/admin/magazalar}" class="quick-link">
+                    <i class="fas fa-store"></i>
+                    <span>Mağaza Yönetimi</span>
+                </a>
+                <a th:href="@{/admin/siparisler}" class="quick-link">
+                    <i class="fas fa-shopping-cart"></i>
+                    <span>Sipariş Yönetimi</span>
+                </a>
+                <a th:href="@{/admin/ciro}" class="quick-link">
+                    <i class="fas fa-chart-line"></i>
+                    <span>Ciro Raporu</span>
+                </a>
+            </div>
+
+            <!-- SON SİPARİŞLER -->
+            <div class="grid-2" style="gap: 30px;">
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div
+                        style="padding: 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-clock text-gradient"></i> Son Siparişler
+                        </h3>
+                        <a th:href="@{/admin/siparisler}" class="btn btn-secondary btn-sm">Tümünü Gör</a>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div th:if="${sonSiparisler != null and !sonSiparisler.empty}">
+                            <div th:each="siparis : ${sonSiparisler}"
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-100);">
+                                <div>
+                                    <strong>#<span th:text="${siparis.id}">1</span></strong>
+                                    <span style="color: var(--gray-500);"> - </span>
+                                    <span th:text="${siparis.kullanici.kullaniciAdi}">kullanici</span>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <span style="font-weight: 600;"
+                                        th:text="${#numbers.formatDecimal(siparis.toplamTutar, 0, 2)} + ' TL'">0
+                                        TL</span>
+                                    <span class="badge"
+                                        th:classappend="${siparis.durum.name() == 'BEKLEMEDE' ? 'badge-warning' : siparis.durum.name() == 'TESLIM_EDILDI' ? 'badge-success' : 'badge-primary'}"
+                                        th:text="${siparis.durum}">DURUM</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div th:if="${sonSiparisler == null or sonSiparisler.empty}"
+                            style="text-align: center; color: var(--gray-500); padding: 20px;">
+                            Henüz sipariş yok
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SON KULLANICILAR -->
+                <div class="card" style="padding: 0; overflow: hidden;">
+                    <div
+                        style="padding: 20px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                        <h3 style="display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-user-plus text-gradient"></i> Son Kayıtlar
+                        </h3>
+                        <a th:href="@{/admin/kullanicilar}" class="btn btn-secondary btn-sm">Tümünü Gör</a>
+                    </div>
+                    <div style="padding: 20px;">
+                        <div th:if="${sonKullanicilar != null and !sonKullanicilar.empty}">
+                            <div th:each="k : ${sonKullanicilar}"
+                                style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--gray-100);">
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;"
+                                        th:text="${#strings.substring(k.kullaniciAdi, 0, 1).toUpperCase()}">A</div>
+                                    <div>
+                                        <strong th:text="${k.kullaniciAdi}">kullanici</strong>
+                                        <p style="color: var(--gray-500); font-size: 0.85rem;" th:text="${k.email}">
+                                            email</p>
+                                    </div>
+                                </div>
+                                <span class="badge"
+                                    th:classappend="${k.rol.name() == 'ADMIN' ? 'badge-danger' : k.rol.name() == 'MAGAZA_SAHIBI' ? 'badge-primary' : 'badge-success'}"
+                                    th:text="${k.rol}">ROL</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

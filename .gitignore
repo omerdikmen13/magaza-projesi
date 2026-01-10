@@ -1,0 +1,34 @@
+# Java / Maven
+target/
+*.class
+*.jar
+*.war
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment / Secrets
+.env
+*.env
+application-local.properties
+application-prod.properties
+
+# Hassas bilgiler - application.properties'i GitHub'a yükleme!
+src/main/resources/application.properties
+
+# Node modules (mobil için)
+magaza-mobil/node_modules/
+magaza-mobil/.expo/
+magaza-mobil/dist/
+
+# Build outputs
+build/
+out/

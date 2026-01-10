@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mağaza Ürünleri (Admin) - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/admin/magazalar}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Mağazalara Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header"
+                style="margin: 20px 0 40px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h1><i class="fas fa-boxes"></i> Mağaza Ürünleri</h1>
+                    <p><span th:text="${magaza.ad}" style="font-weight: 700; color: var(--primary-color);">Mağaza
+                            Adı</span> ürünlerini yönetiyorsunuz</p>
+                </div>
+            </div>
+
+            <!-- SUCCESS/ERROR MESSAGES -->
+            <div th:if="${basari}" class="alert alert-success">
+                <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+            </div>
+
+            <!-- PRODUCT LIST -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <table style="width: 100%; border-collapse: collapse;">
+                    <thead>
+                        <tr style="background: var(--gray-100); border-bottom: 2px solid var(--gray-200);">
+                            <th style="padding: 16px; text-align: left;">Resim</th>
+                            <th style="padding: 16px; text-align: left;">Ürün Adı</th>
+                            <th style="padding: 16px; text-align: left;">Kategori</th>
+                            <th style="padding: 16px; text-align: right;">Fiyat</th>
+                            <th style="padding: 16px; text-align: center;">Durum</th>
+                            <th style="padding: 16px; text-align: center;">İşlemler</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="u : ${urunler}" style="border-bottom: 1px solid var(--gray-200);">
+                            <td style="padding: 16px; width: 80px;">
+                                <img th:if="${u.resimUrl}" th:src="${u.resimUrl}"
+                                    style="width: 50px; height: 50px; object-fit: cover; border-radius: 8px;">
+                                <div th:unless="${u.resimUrl}"
+                                    style="width: 50px; height: 50px; background: var(--gray-200); border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image text-muted"></i>
+                                </div>
+                            </td>
+                            <td style="padding: 16px;">
+                                <div style="font-weight: 600;" th:text="${u.ad}">Ürün Adı</div>
+                                <div style="font-size: 0.85rem; color: var(--gray-500);" th:text="${u.renk}">Renk</div>
+                            </td>
+                            <td style="padding: 16px;" th:text="${u.altKategori.ad}">Kategori</td>
+                            <td style="padding: 16px; text-align: right; font-weight: 600;"
+                                th:text="${u.fiyat} + ' TL'">99.90 TL</td>
+                            <td style="padding: 16px; text-align: center;">
+                                <span th:if="${u.aktif}" class="badge badge-success">Aktif</span>
+                                <span th:unless="${u.aktif}" class="badge badge-danger">Pasif</span>
+                            </td>
+                            <td style="padding: 16px; text-align: center;">
+                                <a th:href="@{/admin/urun/{id}/duzenle(id=${u.id})}" class="btn btn-sm btn-primary"
+                                    title="Düzenle">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <form th:action="@{/admin/urun/{id}/sil(id=${u.id})}" method="post"
+                                    style="display: inline-block;" onsubmit="return confirmDelete(event, this);">
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Sil/Pasif">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${#lists.isEmpty(urunler)}"
+                    style="padding: 40px; text-align: center; color: var(--gray-500);">
+                    <i class="fas fa-box-open" style="font-size: 2rem; margin-bottom: 15px;"></i>
+                    <p>Bu mağazanın hiç ürünü yok.</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete(e, form) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu ürünü pasife almak istediğinize emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, Pasife Al',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
+            return false;
+        }
+    </script>
+
+</body>
+
+</html>

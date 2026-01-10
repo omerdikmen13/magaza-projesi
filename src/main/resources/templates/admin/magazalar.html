@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mağaza Yönetimi - Admin</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/admin}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Admin Paneline Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin: 20px 0 30px;">
+                <h1><i class="fas fa-store"></i> Mağaza Yönetimi</h1>
+                <p>Tüm mağazaları görüntüle ve yönet</p>
+            </div>
+
+            <!-- MESAJLAR -->
+            <div th:if="${basari}" class="alert alert-success" style="margin-bottom: 20px;">
+                <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+            </div>
+            <div th:if="${hata}" class="alert alert-error" style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${hata}"></span>
+            </div>
+
+            <!-- MAĞAZA TABLOSU -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                    <h2 style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-list text-gradient"></i> Mağazalar
+                        <span class="badge badge-primary" th:text="${#lists.size(magazalar)} + ' mağaza'">0</span>
+                    </h2>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--gray-100);">
+                                <th style="padding: 16px; text-align: left;">ID</th>
+                                <th style="padding: 16px; text-align: left;">Mağaza Adı</th>
+                                <th style="padding: 16px; text-align: left;">Sahip</th>
+                                <th style="padding: 16px; text-align: left;">Açıklama</th>
+                                <th style="padding: 16px; text-align: center;">Durum</th>
+                                <th style="padding: 16px; text-align: center;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="m : ${magazalar}" style="border-bottom: 1px solid var(--gray-200);">
+                                <td style="padding: 16px;" th:text="${m.id}">1</td>
+                                <td style="padding: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;"
+                                            th:text="${#strings.substring(m.ad, 0, 1).toUpperCase()}">M</div>
+                                        <strong th:text="${m.ad}">Mağaza</strong>
+                                    </div>
+                                </td>
+                                <td style="padding: 16px;" th:text="${m.sahip.kullaniciAdi}">sahip</td>
+                                <td style="padding: 16px; color: var(--gray-600);"
+                                    th:text="${#strings.abbreviate(m.aciklama, 40)}">Açıklama</td>
+                                <td style="padding: 16px; text-align: center;">
+                                    <span class="badge" th:classappend="${m.aktif ? 'badge-success' : 'badge-danger'}"
+                                        th:text="${m.aktif ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                </td>
+                                <td style="padding: 16px;">
+                                    <div style="display: flex; gap: 5px; justify-content: center;">
+                                        <!-- Ürünler -->
+                                        <a th:href="@{/admin/magaza/{id}/urunler(id=${m.id})}"
+                                            class="btn btn-sm btn-info" title="Ürünleri Gör"
+                                            style="background-color: #3498db; color: white;">
+                                            <i class="fas fa-boxes"></i>
+                                        </a>
+
+                                        <!-- Düzenle -->
+                                        <a th:href="@{/admin/magaza/{id}/duzenle(id=${m.id})}"
+                                            class="btn btn-sm btn-primary" title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+
+                                        <!-- Görüntüle -->
+                                        <a th:href="@{/magazalar/{id}(id=${m.id})}" class="btn btn-secondary btn-sm"
+                                            title="Görüntüle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+
+                                        <!-- Durum Değiştir -->
+                                        <form th:action="@{/admin/magaza/{id}/durum-degistir(id=${m.id})}" method="post"
+                                            style="display: inline;">
+                                            <button type="submit" class="btn btn-sm"
+                                                th:style="${m.aktif ? 'background: #f39c12; color: white;' : 'background: #27ae60; color: white;'}"
+                                                th:title="${m.aktif ? 'Pasif Yap' : 'Aktif Yap'}">
+                                                <i th:class="${m.aktif ? 'fas fa-ban' : 'fas fa-check'}"></i>
+                                            </button>
+                                        </form>
+
+                                        <!-- Sil -->
+                                        <form th:action="@{/admin/magaza/{id}/sil(id=${m.id})}" method="post"
+                                            style="display: inline;" onsubmit="return confirmDelete(event, this);">
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Sil">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div th:if="${#lists.isEmpty(magazalar)}"
+                    style="padding: 60px; text-align: center; color: var(--gray-500);">
+                    <i class="fas fa-store-slash" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h3>Henüz mağaza yok</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete(e, form) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu mağazayı silmek istediğinize emin misiniz? Bu işlem geri alınamaz!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, Sil',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
+            return false;
+        }
+    </script>
+
+</body>
+
+</html>

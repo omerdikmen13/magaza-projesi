@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${magaza.ad} + ' - Yönetim'">Mağaza Yönetimi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .product-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+        }
+
+        .product-table th {
+            background: var(--gray-100);
+            padding: 16px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--gray-700);
+            border-bottom: 2px solid var(--gray-200);
+        }
+
+        .product-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: middle;
+        }
+
+        .product-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        .product-image-small {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image-small i {
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Panele Dön
+            </a>
+
+            <!-- STORE HEADER -->
+            <div class="card"
+                style="margin: 20px 0 30px; padding: 30px; background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                    <div style="display: flex; align-items: center; gap: 20px;">
+                        <div
+                            style="width: 70px; height: 70px; background: var(--gradient-primary); border-radius: 16px; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-store" style="font-size: 1.8rem; color: white;"></i>
+                        </div>
+                        <div>
+                            <h1 style="margin-bottom: 5px;" th:text="${magaza.ad}">Mağaza Adı</h1>
+                            <p style="color: var(--gray-600);" th:text="${magaza.aciklama}">Açıklama</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <a th:href="@{/sahip/magaza/{id}/siparisler(id=${magaza.id})}" class="btn btn-primary">
+                            <i class="fas fa-box"></i> Siparişler
+                        </a>
+                        <a th:href="@{/sahip/magaza/{id}/ciro(id=${magaza.id})}" class="btn btn-secondary">
+                            <i class="fas fa-chart-line"></i> Ciro
+                        </a>
+                        <a th:href="@{/sahip/magaza/{id}/urun-ekle(id=${magaza.id})}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Yeni Ürün
+                        </a>
+                        <a th:href="@{/magazalar/{id}(id=${magaza.id})}" class="btn btn-secondary">
+                            <i class="fas fa-eye"></i> Görüntüle
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mesajlar -->
+            <div th:if="${basari}" class="alert alert-success" style="margin-bottom: 30px;">
+                <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+            </div>
+
+            <!-- PRODUCTS SECTION -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div
+                    style="padding: 24px; border-bottom: 1px solid var(--gray-200); display: flex; justify-content: space-between; align-items: center;">
+                    <h2 style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-box text-gradient"></i> Ürünler
+                        <span class="badge badge-primary" th:text="${#lists.size(urunler)} + ' ürün'">0 ürün</span>
+                    </h2>
+                </div>
+
+                <!-- Products Table -->
+                <div th:if="${!#lists.isEmpty(urunler)}" style="overflow-x: auto;">
+                    <table class="product-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">Görsel</th>
+                                <th>Ürün Adı</th>
+                                <th>Kategori</th>
+                                <th>Renk</th>
+                                <th>Fiyat</th>
+                                <th>Durum</th>
+                                <th style="width: 120px;">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="urun : ${urunler}">
+                                <td>
+                                    <div class="product-image-small">
+                                        <i class="fas fa-tshirt"></i>
+                                    </div>
+                                </td>
+                                <td>
+                                    <strong th:text="${urun.ad}">Ürün Adı</strong>
+                                    <p style="color: var(--gray-500); font-size: 0.85rem; margin-top: 4px;"
+                                        th:text="${#strings.abbreviate(urun.aciklama, 50)}">Açıklama</p>
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary"
+                                        th:text="${urun.altKategori.kategori.ad}">Erkek</span>
+                                    <span class="badge badge-success" th:text="${urun.altKategori.ad}">Tişört</span>
+                                </td>
+                                <td th:text="${urun.renk}">Beyaz</td>
+                                <td style="font-weight: 700; color: var(--primary-color);"
+                                    th:text="${#numbers.formatDecimal(urun.fiyat, 1, 2)} + ' TL'">199.99 TL</td>
+                                <td>
+                                    <span class="badge"
+                                        th:classappend="${urun.aktif ? 'badge-success' : 'badge-danger'}">
+                                        <span th:text="${urun.aktif ? 'Aktif' : 'Pasif'}">Aktif</span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <!-- DÜZENLE BUTONU -->
+                                        <a th:href="@{/sahip/magaza/{magazaId}/urun-duzenle/{urunId}(magazaId=${magaza.id}, urunId=${urun.id})}"
+                                            class="btn btn-sm"
+                                            style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; border: none;"
+                                            title="Düzenle">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <a th:href="@{/urun/{id}(id=${urun.id})}" class="btn btn-secondary btn-sm"
+                                            title="Görüntüle">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <form th:action="@{/sahip/urun/{id}/sil(id=${urun.id})}" method="post"
+                                            style="display: inline;">
+                                            <button type="submit" class="btn btn-secondary btn-sm"
+                                                style="color: #e74c3c;"
+                                                onclick="return confirm('Bu ürünü silmek istediğinize emin misiniz?')"
+                                                title="Sil">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Empty State -->
+                <div th:if="${#lists.isEmpty(urunler)}" class="empty-state" style="padding: 60px;">
+                    <div class="empty-state-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
+                    <h3>Henüz Ürün Eklemediniz</h3>
+                    <p>Mağazanıza ilk ürününüzü ekleyerek satışa başlayın!</p>
+                    <a th:href="@{/sahip/magaza/{id}/urun-ekle(id=${magaza.id})}" class="btn btn-primary"
+                        style="padding: 14px 40px;">
+                        <i class="fas fa-plus"></i> İlk Ürünü Ekle
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

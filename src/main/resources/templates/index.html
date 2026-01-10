@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ana Sayfa - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <!-- HERO SECTION WITH VIDEO BACKGROUND -->
+    <div class="hero" style="position: relative; overflow: hidden;">
+        <!-- Video Background -->
+        <video autoplay muted loop playsinline style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; 
+                      transform: translate(-50%, -50%); z-index: 0; object-fit: cover;">
+            <source th:src="@{/video/background.mp4}" type="video/mp4">
+        </video>
+
+        <!-- Overlay for better text readability -->
+        <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); z-index: 1;">
+        </div>
+
+        <!-- Content -->
+        <div class="container" style="position: relative; z-index: 2;">
+            <h1 class="fade-in-up">🛍️ Alışverişin Yeni Adresi</h1>
+            <p class="fade-in-up" style="animation-delay: 0.1s;">
+                Türkiye'nin en sevilen markalarından binlerce ürün, tek platformda!
+            </p>
+
+            <!-- ARAMA BARI -->
+            <form th:action="@{/ara}" method="get" class="fade-in-up"
+                style="animation-delay: 0.15s; max-width: 600px; margin: 0 auto 30px;">
+                <div
+                    style="display: flex; background: white; border-radius: 16px; padding: 8px; box-shadow: 0 10px 40px rgba(0,0,0,0.15);">
+                    <input type="text" name="q" placeholder="Ürün, marka veya kategori ara..."
+                        style="flex: 1; border: none; padding: 16px 20px; font-size: 1rem; background: transparent; outline: none;"
+                        minlength="2" required>
+                    <button type="submit" class="btn btn-primary" style="border-radius: 12px; padding: 16px 24px;">
+                        <i class="fas fa-search"></i> Ara
+                    </button>
+                </div>
+            </form>
+
+            <a th:href="@{/magazalar}" class="btn btn-lg fade-in-up"
+                style="background: white; color: #667eea; animation-delay: 0.2s;">
+                <i class="fas fa-rocket"></i> Alışverişe Başla
+            </a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- KATEGORİLER -->
+            <h2 style="text-align: center; margin-bottom: 50px; font-size: 2.2rem; font-weight: 800;">
+                <span class="text-gradient"><i class="fas fa-th-large"></i> Kategorilere Göz At</span>
+            </h2>
+
+            <div class="grid-3" style="margin-bottom: 60px;">
+                <!-- ERKEK -->
+                <a th:href="@{/magazalar(kategoriId=1)}" style="text-decoration: none;">
+                    <div class="category-card">
+                        <div class="icon-wrapper">
+                            <i class="fas fa-male"></i>
+                        </div>
+                        <h3>Erkek</h3>
+                        <p>Tişört, Gömlek, Pantolon, Kazak</p>
+                    </div>
+                </a>
+
+                <!-- KADIN -->
+                <a th:href="@{/magazalar(kategoriId=2)}" style="text-decoration: none;">
+                    <div class="category-card">
+                        <div class="icon-wrapper"
+                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-female"></i>
+                        </div>
+                        <h3>Kadın</h3>
+                        <p>Elbise, Bluz, Etek, Kazak</p>
+                    </div>
+                </a>
+
+                <!-- ÇOCUK -->
+                <a th:href="@{/magazalar(kategoriId=3)}" style="text-decoration: none;">
+                    <div class="category-card">
+                        <div class="icon-wrapper"
+                            style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                            <i class="fas fa-child"></i>
+                        </div>
+                        <h3>Çocuk</h3>
+                        <p>Tişört, Sweatshirt, Pantolon</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- CTA BUTTON -->
+            <div style="text-align: center; margin-bottom: 80px;">
+                <a th:href="@{/magazalar}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-store"></i> Tüm Mağazaları Keşfet
+                </a>
+            </div>
+
+            <!-- MARKALAR -->
+            <div class="features-section">
+                <h2 style="text-align: center; margin-bottom: 50px; font-size: 2rem; font-weight: 800;">
+                    <span class="text-gradient"><i class="fas fa-star"></i> Popüler Markalar</span>
+                </h2>
+                <div class="grid-4" style="text-align: center;">
+                    <div class="feature-item">
+                        <div class="feature-icon"
+                            style="background: linear-gradient(135deg, #0052cc 0%, #0066ff 100%);">
+                            <i class="fas fa-tshirt"></i>
+                        </div>
+                        <h4>Mavi</h4>
+                        <p>Denim Uzmanı</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"
+                            style="background: linear-gradient(135deg, #ff6b35 0%, #ff9a56 100%);">
+                            <i class="fas fa-gem"></i>
+                        </div>
+                        <h4>Koton</h4>
+                        <p>Şık Moda</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"
+                            style="background: linear-gradient(135deg, #00b894 0%, #55efc4 100%);">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <h4>LC Waikiki</h4>
+                        <p>Aile Modası</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"
+                            style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);">
+                            <i class="fas fa-fire"></i>
+                        </div>
+                        <h4>Zara</h4>
+                        <p>Premium Tasarım</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AVANTAJLAR -->
+            <div
+                style="margin-top: 80px; padding: 60px 40px; background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%); border-radius: 32px; text-align: center;">
+                <h2 style="color: var(--dark); margin-bottom: 20px; font-size: 2rem; font-weight: 800;">
+                    <i class="fas fa-trophy text-gradient"></i> Neden Biz?
+                </h2>
+                <p
+                    style="color: var(--gray-600); font-size: 1.15rem; margin-bottom: 50px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                    Güvenli ödeme, hızlı teslimat ve geniş ürün yelpazesi ile alışverişin keyfini çıkarın!
+                </p>
+                <div class="grid-3" style="max-width: 900px; margin: 0 auto;">
+                    <div class="feature-item">
+                        <div class="feature-icon">
+                            <i class="fas fa-shipping-fast"></i>
+                        </div>
+                        <h4>Hızlı Kargo</h4>
+                        <p>1-3 iş günü teslimat</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"
+                            style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <h4>Güvenli Ödeme</h4>
+                        <p>256-bit SSL şifreleme</p>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon"
+                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <i class="fas fa-undo"></i>
+                        </div>
+                        <h4>Kolay İade</h4>
+                        <p>14 gün ücretsiz iade</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="background: var(--dark); color: white; padding: 60px 0 40px; margin-top: 80px;">
+        <div class="container">
+            <div class="grid-3" style="margin-bottom: 40px;">
+                <div>
+                    <h3 style="font-size: 1.5rem; margin-bottom: 20px;">
+                        <i class="fas fa-store text-gradient"></i> Mağaza Sistemi
+                    </h3>
+                    <p style="color: var(--gray-500); line-height: 1.8;">
+                        Türkiye'nin en sevilen markalarından alışveriş yapabileceğiniz güvenilir platform.
+                    </p>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 20px; font-size: 1.1rem;">Hızlı Linkler</h4>
+                    <ul style="display: flex; flex-direction: column; gap: 12px;">
+                        <li><a th:href="@{/magazalar}" style="color: var(--gray-400);">Mağazalar</a></li>
+                        <li><a th:href="@{/giris}" style="color: var(--gray-400);">Giriş Yap</a></li>
+                        <li><a th:href="@{/uye-ol}" style="color: var(--gray-400);">Üye Ol</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 style="margin-bottom: 20px; font-size: 1.1rem;">İletişim</h4>
+                    <p style="color: var(--gray-500); margin-bottom: 10px;">
+                        <i class="fas fa-envelope"></i> info@magazasistemi.com
+                    </p>
+                    <p style="color: var(--gray-500);">
+                        <i class="fas fa-phone"></i> +90 212 123 45 67
+                    </p>
+                </div>
+            </div>
+            <div style="border-top: 1px solid var(--gray-800); padding-top: 30px; text-align: center;">
+                <p style="color: var(--gray-600);">© 2024 Mağaza Sistemi. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- AI Chat Widget -->
+    <th:block th:insert="~{fragments/ai-chat-widget}"></th:block>
+
+</body>
+
+</html>

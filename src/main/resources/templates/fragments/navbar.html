@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<!-- NAVBAR FRAGMENT - Role-based menu -->
+<nav th:fragment="navbar" class="navbar">
+    <div class="navbar-brand">
+        <a th:href="@{/}" style="display: flex; align-items: center; gap: 12px;">
+            <i class="fas fa-store"></i> Mağaza Sistemi
+        </a>
+    </div>
+    <div class="navbar-nav">
+
+        <!-- ============ MAĞAZA SAHİBİ MENÜSÜ ============ -->
+        <th:block sec:authorize="isAuthenticated()">
+            <th:block
+                th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI}">
+
+                <!-- Dashboard/Panel -->
+                <a th:href="@{/sahip}" class="nav-link"
+                    style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600;">
+                    <i class="fas fa-tachometer-alt"></i> Panel
+                </a>
+
+                <!-- Mağazalarım -->
+                <a th:href="@{/sahip}" class="nav-link">
+                    <i class="fas fa-store-alt"></i> Mağazalarım
+                </a>
+
+                <!-- Mesajlar -->
+                <a th:href="@{/sahip/mesajlar}" class="nav-link">
+                    <i class="fas fa-envelope"></i> Mesajlar
+                </a>
+
+            </th:block>
+
+            <!-- ============ ADMIN MENÜSÜ ============ -->
+            <th:block th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).ADMIN}">
+                <a th:href="@{/admin}" class="nav-link"
+                    style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; font-weight: 600;">
+                    <i class="fas fa-shield-alt"></i> Admin
+                </a>
+                <a th:href="@{/admin/kullanicilar}" class="nav-link">
+                    <i class="fas fa-users"></i> Kullanıcılar
+                </a>
+                <a th:href="@{/admin/magazalar}" class="nav-link">
+                    <i class="fas fa-store"></i> Mağazalar
+                </a>
+                <a th:href="@{/admin/siparisler}" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> Siparişler
+                </a>
+                <a th:href="@{/admin/ciro}" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Ciro
+                </a>
+                <a th:href="@{/admin/mesajlar}" class="nav-link">
+                    <i class="fas fa-comments"></i> Mesajlaşmalar
+                </a>
+            </th:block>
+
+            <!-- ============ MÜŞTERİ MENÜSÜ ============ -->
+            <th:block th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}">
+                <a th:href="@{/magazalar}" class="nav-link">
+                    <i class="fas fa-shopping-bag"></i> Mağazalar
+                </a>
+                <a th:href="@{/favorilerim}" class="nav-link">
+                    <i class="fas fa-heart" style="color: #f43f5e;"></i> Favorilerim
+                </a>
+                <a th:href="@{/sepet}" class="nav-link">
+                    <i class="fas fa-shopping-cart"></i> Sepetim
+                </a>
+                <a th:href="@{/siparislerim}" class="nav-link">
+                    <i class="fas fa-box"></i> Siparişlerim
+                </a>
+                <a th:href="@{/mesajlarim}" class="nav-link">
+                    <i class="fas fa-comments"></i> Mesajlarım
+                </a>
+            </th:block>
+        </th:block>
+
+        <!-- ============ GİRİŞ YAPMAMIŞ KULLANICI ============ -->
+        <th:block sec:authorize="!isAuthenticated()">
+            <a th:href="@{/magazalar}" class="nav-link">
+                <i class="fas fa-shopping-bag"></i> Mağazalar
+            </a>
+        </th:block>
+
+        <!-- ============ USER SECTION ============ -->
+        <div sec:authorize="isAuthenticated()" class="user-section">
+            <a th:href="@{/hesabim}" class="user-name">
+                <i class="fas fa-user-circle"></i> <span sec:authentication="name"></span>
+            </a>
+            <a th:href="@{/logout}" class="btn-nav btn-logout">
+                <i class="fas fa-sign-out-alt"></i> Çıkış
+            </a>
+        </div>
+
+        <div sec:authorize="!isAuthenticated()" style="display: flex; gap: 10px;">
+            <a th:href="@{/giris}" class="nav-link">Giriş Yap</a>
+            <a th:href="@{/uye-ol}" class="btn-nav">Üye Ol</a>
+        </div>
+    </div>
+</nav>
+
+</html>

@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mağaza Sahibi Paneli - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .owner-header {
+            background: var(--gradient-primary);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .owner-header h1 {
+            margin-bottom: 10px;
+        }
+
+        .store-card {
+            background: var(--white);
+            border-radius: var(--radius-xl);
+            border: 1px solid var(--gray-200);
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .store-card:hover {
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-color);
+            transform: translateY(-5px);
+        }
+
+        .store-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .store-icon i {
+            font-size: 2rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .create-store-card {
+            border: 2px dashed var(--gray-300);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+            cursor: pointer;
+            text-decoration: none;
+            color: var(--gray-500);
+        }
+
+        .create-store-card:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .create-store-card i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- OWNER HEADER -->
+            <div class="owner-header">
+                <h1><i class="fas fa-store-alt"></i> Mağaza Sahibi Paneli</h1>
+                <p>Mağazalarınızı yönetin, ürün ekleyin ve satışlarınızı takip edin</p>
+            </div>
+
+            <!-- Mesajlar -->
+            <div th:if="${basari}" class="alert alert-success" style="margin-bottom: 30px;">
+                <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+            </div>
+
+            <!-- STORES GRID -->
+            <h2 style="margin-bottom: 24px; display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-store text-gradient"></i> Mağazalarım
+                <span class="badge badge-primary" th:text="${#lists.size(magazalar)} + ' mağaza'">0 mağaza</span>
+            </h2>
+
+            <div class="grid-3" style="gap: 24px;">
+                <!-- Create New Store Card -->
+                <a th:href="@{/sahip/magaza-olustur}" class="store-card create-store-card">
+                    <i class="fas fa-plus-circle"></i>
+                    <span style="font-size: 1.1rem; font-weight: 600;">Yeni Mağaza Oluştur</span>
+                </a>
+
+                <!-- Existing Stores -->
+                <div th:each="magaza : ${magazalar}" class="store-card">
+                    <div class="store-icon">
+                        <i class="fas fa-store"></i>
+                    </div>
+                    <h3 style="margin-bottom: 10px;" th:text="${magaza.ad}">Mağaza Adı</h3>
+                    <p style="color: var(--gray-600); margin-bottom: 20px; font-size: 0.95rem;"
+                        th:text="${magaza.aciklama}">Açıklama</p>
+
+                    <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                        <span class="badge" th:classappend="${magaza.aktif ? 'badge-success' : 'badge-danger'}">
+                            <i th:class="${magaza.aktif ? 'fas fa-check' : 'fas fa-times'}"></i>
+                            <span th:text="${magaza.aktif ? 'Aktif' : 'Pasif'}">Aktif</span>
+                        </span>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <a th:href="@{/sahip/magaza/{id}(id=${magaza.id})}" class="btn btn-primary"
+                            style="width: 100%;">
+                            <i class="fas fa-cog"></i> Yönet
+                        </a>
+
+                        <div style="display: flex; gap: 8px;">
+                            <a th:href="@{/sahip/magaza/{id}/duzenle(id=${magaza.id})}" class="btn btn-secondary"
+                                style="flex: 1; font-size: 0.9rem;">
+                                <i class="fas fa-edit"></i> Düzenle
+                            </a>
+                            <form th:action="@{/sahip/magaza/{id}/sil(id=${magaza.id})}" method="post" style="flex: 1;"
+                                onsubmit="return confirm('Bu mağazayı silmek istediğinize emin misiniz?');">
+                                <button type="submit" class="btn btn-danger"
+                                    style="width: 100%; height: 100%; font-size: 0.9rem; padding: 10px;">
+                                    <i class="fas fa-trash"></i> Sil
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

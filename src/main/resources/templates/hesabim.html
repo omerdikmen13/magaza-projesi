@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hesabım - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin-bottom: 40px;">
+                <h1><i class="fas fa-user-cog"></i> Hesabım</h1>
+                <p>Profil bilgilerinizi görüntüleyin ve düzenleyin</p>
+            </div>
+
+            <div class="grid-2" style="gap: 40px;">
+
+                <!-- PROFIL BILGILERI -->
+                <div class="card" style="padding: 40px;">
+                    <h2 style="margin-bottom: 30px; display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-id-card text-gradient"></i> Profil Bilgileri
+                    </h2>
+
+                    <!-- Mesajlar -->
+                    <div th:if="${hata}" class="alert alert-error">
+                        <i class="fas fa-exclamation-circle"></i> <span th:text="${hata}"></span>
+                    </div>
+                    <div th:if="${basari}" class="alert alert-success">
+                        <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+                    </div>
+
+                    <form th:action="@{/hesabim/guncelle}" method="post">
+                        <div class="form-group">
+                            <label class="form-label">Kullanıcı Adı</label>
+                            <input type="text" class="form-control" th:value="${kullanici.kullaniciAdi}" disabled
+                                style="background: var(--gray-100); cursor: not-allowed;">
+                            <small style="color: var(--gray-500);">Kullanıcı adı değiştirilemez</small>
+                        </div>
+
+                        <div class="grid-2" style="gap: 20px;">
+                            <div class="form-group">
+                                <label class="form-label" for="ad">Ad</label>
+                                <input type="text" id="ad" name="ad" class="form-control" th:value="${kullanici.ad}"
+                                    required placeholder="Adınız">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="soyad">Soyad</label>
+                                <input type="text" id="soyad" name="soyad" class="form-control"
+                                    th:value="${kullanici.soyad}" required placeholder="Soyadınız">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="email">E-posta</label>
+                            <input type="email" id="email" name="email" class="form-control"
+                                th:value="${kullanici.email}" required placeholder="ornek@email.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="telefon">Telefon</label>
+                            <input type="tel" id="telefon" name="telefon" class="form-control"
+                                th:value="${kullanici.telefon}" placeholder="05XX XXX XX XX">
+                        </div>
+
+                        <div class="form-group">
+                            <!-- Müşteri için: Teslimat adresi -->
+                            <th:block th:if="${kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}">
+                                <label class="form-label" for="adres">
+                                    <i class="fas fa-map-marker-alt"></i> Teslimat Adresi
+                                </label>
+                                <textarea id="adres" name="adres" class="form-control" rows="3"
+                                    placeholder="Siparişlerinizin teslim edileceği adres"
+                                    th:text="${kullanici.adres}"></textarea>
+                            </th:block>
+
+                            <!-- Mağaza sahibi için: İletişim adresi -->
+                            <th:block th:if="${kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI}">
+                                <label class="form-label" for="adres">
+                                    <i class="fas fa-building"></i> İş İletişim Adresi
+                                </label>
+                                <textarea id="adres" name="adres" class="form-control" rows="3"
+                                    placeholder="Mağaza sahipliği için iletişim adresiniz"
+                                    th:text="${kullanici.adres}"></textarea>
+                                <small style="color: var(--gray-500);">Bu adres, resmi işlemler ve iletişim için
+                                    kullanılır</small>
+                            </th:block>
+
+                            <!-- Admin için: Ofis adresi -->
+                            <th:block th:if="${kullanici.rol == T(com.magazaapp.model.KullaniciRol).ADMIN}">
+                                <label class="form-label" for="adres">
+                                    <i class="fas fa-building"></i> Ofis Adresi
+                                </label>
+                                <textarea id="adres" name="adres" class="form-control" rows="3"
+                                    placeholder="Ofis adresiniz" th:text="${kullanici.adres}"></textarea>
+                            </th:block>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                        </button>
+                    </form>
+                </div>
+
+                <!-- ŞIFRE DEĞİŞTİRME & HESAP BİLGİLERİ -->
+                <div>
+                    <!-- Hesap Özeti -->
+                    <div class="card" style="padding: 30px; margin-bottom: 30px;">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-chart-pie text-gradient"></i> Hesap Özeti
+                        </h3>
+                        <div style="display: flex; flex-direction: column; gap: 16px;">
+                            <div
+                                style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-200);">
+                                <span style="color: var(--gray-600);">Hesap Türü</span>
+                                <span class="badge badge-primary"
+                                    th:text="${kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI ? 'Müşteri' : kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI ? 'Mağaza Sahibi' : 'Admin'}">Müşteri</span>
+                            </div>
+                            <div
+                                style="display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid var(--gray-200);">
+                                <span style="color: var(--gray-600);">Üyelik Tarihi</span>
+                                <span th:text="${#temporals.format(kullanici.olusturmaTarihi, 'dd MMMM yyyy')}">01 Ocak
+                                    2024</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 12px 0;">
+                                <span style="color: var(--gray-600);">Hesap Durumu</span>
+                                <span class="badge badge-success">
+                                    <i class="fas fa-check-circle"></i> Aktif
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Şifre Değiştirme -->
+                    <div class="card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-lock text-gradient"></i> Şifre Değiştir
+                        </h3>
+
+                        <!-- Şifre Mesajları -->
+                        <div th:if="${sifreHata}" class="alert alert-error">
+                            <i class="fas fa-exclamation-circle"></i> <span th:text="${sifreHata}"></span>
+                        </div>
+                        <div th:if="${sifreBasari}" class="alert alert-success">
+                            <i class="fas fa-check-circle"></i> <span th:text="${sifreBasari}"></span>
+                        </div>
+
+                        <form th:action="@{/hesabim/sifre-degistir}" method="post">
+                            <div class="form-group">
+                                <label class="form-label" for="mevcutSifre">Mevcut Şifre</label>
+                                <input type="password" id="mevcutSifre" name="mevcutSifre" class="form-control" required
+                                    placeholder="••••••••">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="yeniSifre">Yeni Şifre</label>
+                                <input type="password" id="yeniSifre" name="yeniSifre" class="form-control" required
+                                    minlength="6" placeholder="En az 6 karakter">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="yeniSifreTekrar">Yeni Şifre (Tekrar)</label>
+                                <input type="password" id="yeniSifreTekrar" name="yeniSifreTekrar" class="form-control"
+                                    required minlength="6" placeholder="Yeni şifreyi tekrar girin">
+                            </div>
+
+                            <button type="submit" class="btn btn-secondary" style="width: 100%;">
+                                <i class="fas fa-key"></i> Şifreyi Değiştir
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

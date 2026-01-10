@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${magaza.ad} + ' - Ciro Raporu'">Ciro Raporu</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .ciro-header {
+            background: var(--gradient-primary);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .ciro-value {
+            font-size: 3.5rem;
+            font-weight: 800;
+            margin: 20px 0;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-box {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+        }
+
+        .stat-box .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+        }
+
+        .stat-box .label {
+            color: var(--gray-600);
+            margin-top: 10px;
+        }
+
+        .transaction-row {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .transaction-row:hover {
+            background: var(--gray-50);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip/magaza/{id}(id=${magaza.id})}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Mağaza Yönetimine Dön
+            </a>
+
+            <!-- CIRO HEADER -->
+            <div class="ciro-header">
+                <h1><i class="fas fa-chart-line"></i> Ciro Raporu</h1>
+                <p th:text="${magaza.ad}">Mağaza</p>
+                <div class="ciro-value" th:text="${#numbers.formatDecimal(toplamCiro, 1, 2)} + ' TL'">0 TL</div>
+                <p>Toplam Ciro (Teslim Edilen Siparişler)</p>
+            </div>
+
+            <!-- STATS -->
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="value text-gradient" th:text="${toplamSiparis}">0</div>
+                    <div class="label"><i class="fas fa-shopping-bag"></i> Tamamlanan Sipariş</div>
+                </div>
+                <div class="stat-box">
+                    <div class="value text-gradient"
+                        th:text="${toplamSiparis > 0 ? #numbers.formatDecimal(toplamCiro / toplamSiparis, 1, 2) : '0.00'} + ' TL'">
+                        0 TL</div>
+                    <div class="label"><i class="fas fa-receipt"></i> Ortalama Sipariş Tutarı</div>
+                </div>
+            </div>
+
+            <!-- TRANSACTION HISTORY -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                    <h3><i class="fas fa-history"></i> Son Tamamlanan Siparişler</h3>
+                </div>
+
+                <div style="padding: 20px;">
+                    <div th:if="${#lists.isEmpty(siparisler)}" class="empty-state" style="padding: 40px;">
+                        <i class="fas fa-chart-bar"
+                            style="font-size: 3rem; color: var(--gray-400); margin-bottom: 15px;"></i>
+                        <h4>Henüz tamamlanan sipariş yok</h4>
+                        <p style="color: var(--gray-500);">Teslim edilen siparişler burada görünecek</p>
+                    </div>
+
+                    <div th:each="siparis : ${siparisler}" class="transaction-row">
+                        <div>
+                            <div style="font-weight: 600;">
+                                Sipariş #<span th:text="${siparis.id}">1</span>
+                            </div>
+                            <div style="color: var(--gray-500); font-size: 0.9rem;"
+                                th:text="${#temporals.format(siparis.siparisTarihi, 'dd.MM.yyyy HH:mm')}">01.01.2024
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 700; font-size: 1.1rem; color: #27ae60;"
+                                th:text="'+' + ${#numbers.formatDecimal(siparis.toplamTutar, 1, 2)} + ' TL'">+0 TL</div>
+                            <span class="badge badge-success">
+                                <i class="fas fa-check"></i> Teslim Edildi
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

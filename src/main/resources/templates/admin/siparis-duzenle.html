@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş Düzenle (Admin) - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page" style="max-width: 1000px; margin: 0 auto;">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/admin/siparisler}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Siparişlere Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="text-align: center; margin-bottom: 40px;">
+                <h1><i class="fas fa-edit"></i> Sipariş Düzenle</h1>
+                <p>Sipariş <strong th:text="'#' + ${siparis.id}">#123</strong> bilgilerini güncelliyorsunuz</p>
+                <!-- MESSAGES -->
+                <div th:if="${basari}" class="alert alert-success" style="margin-top: 15px;">
+                    <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+                </div>
+                <div th:if="${hata}" class="alert alert-error" style="margin-top: 15px;">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${hata}"></span>
+                </div>
+                <div th:if="${uyari}" class="alert alert-warning" style="margin-top: 15px;">
+                    <i class="fas fa-exclamation-triangle"></i> <span th:text="${uyari}"></span>
+                </div>
+            </div>
+
+            <div class="grid-2" style="gap: 30px; align-items: start; grid-template-columns: 1fr 1.5fr;">
+
+                <!-- LEFT: Status & Address Form -->
+                <div class="card" style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--gray-200); padding-bottom: 10px;">
+                        <i class="fas fa-info-circle"></i> Genel Bilgiler
+                    </h3>
+                    <form th:action="@{/admin/siparis/{id}/duzenle(id=${siparis.id})}" method="post">
+
+                        <div class="form-group">
+                            <label class="form-label">Sipariş Durumu</label>
+                            <select name="durum" class="form-control" required style="padding: 10px;">
+                                <option th:each="durum : ${durumlar}" th:value="${durum}" th:text="${durum}"
+                                    th:selected="${durum == siparis.durum}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teslimat Adresi</label>
+                            <textarea name="teslimatAdresi" class="form-control" rows="5"
+                                th:text="${siparis.teslimatAdresi}" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-save"></i> Bilgileri Güncelle
+                        </button>
+                    </form>
+
+                    <div style="margin-top: 30px;">
+                        <h4 style="margin-bottom: 10px; color: var(--gray-600);">Müşteri</h4>
+                        <div style="background: var(--gray-50); padding: 15px; border-radius: 8px;">
+                            <div style="font-weight: 600;"
+                                th:text="${siparis.kullanici.ad + ' ' + siparis.kullanici.soyad}">Ad Soyad</div>
+                            <div style="color: var(--gray-500); font-size: 0.9rem;"
+                                th:text="${siparis.kullanici.email}">email</div>
+                            <div style="color: var(--gray-500); font-size: 0.9rem;"
+                                th:text="${siparis.kullanici.telefon}">telefon</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Order Content Form -->
+                <div class="card" style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--gray-200); padding-bottom: 10px;">
+                        <i class="fas fa-shopping-basket"></i> Sipariş İçeriği
+                    </h3>
+
+                    <form th:action="@{/admin/siparis/{id}/icerik-guncelle(id=${siparis.id})}" method="post"
+                        onsubmit="return confirm('Sipariş içeriğini güncellemek istediğinize emin misiniz? Stoklar etkilenecektir.');">
+
+                        <div style="overflow-x: auto;">
+                            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                                <thead>
+                                    <tr style="background: var(--gray-100); font-size: 0.9rem;">
+                                        <th style="padding: 10px; text-align: left;">Ürün</th>
+                                        <th style="padding: 10px; text-align: center;">Beden</th>
+                                        <th style="padding: 10px; text-align: right;">Fiyat</th>
+                                        <th style="padding: 10px; text-align: center;">Adet</th>
+                                        <th style="padding: 10px; text-align: center;">Sil</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="detay : ${siparisDetaylari}"
+                                        style="border-bottom: 1px solid var(--gray-200);">
+                                        <td style="padding: 10px;">
+                                            <input type="hidden" name="detayIds" th:value="${detay.id}">
+                                            <div style="display: flex; align-items: center; gap: 10px;">
+                                                <img th:if="${detay.urun.resimUrl}" th:src="${detay.urun.resimUrl}"
+                                                    style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;">
+                                                <div>
+                                                    <div style="font-weight: 600; font-size: 0.9rem;"
+                                                        th:text="${detay.urun.ad}">Ürün</div>
+                                                    <div style="font-size: 0.8rem; color: var(--gray-500);"
+                                                        th:text="${detay.urun.renk}">Renk</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <span class="badge" th:text="${detay.beden.ad}">S</span>
+                                        </td>
+                                        <td style="padding: 10px; text-align: right;"
+                                            th:text="${detay.birimFiyat} + ' TL'">
+                                            100 TL
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <input type="number" name="adetler" th:value="${detay.adet}" min="1"
+                                                style="width: 60px; padding: 5px; text-align: center; border: 1px solid var(--gray-300); border-radius: 4px;">
+                                        </td>
+                                        <td style="padding: 10px; text-align: center;">
+                                            <input type="checkbox" name="silinecekIds" th:value="${detay.id}"
+                                                style="width: 18px; height: 18px; cursor: pointer;">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding-top: 20px; border-top: 2px solid var(--gray-200);">
+                            <div style="text-align: left;">
+                                <div style="font-size: 0.9rem; color: var(--gray-500);">Toplam Tutar</div>
+                                <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary-color);"
+                                    th:text="${siparis.toplamTutar} + ' TL'">0.00 TL</div>
+                            </div>
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-sync-alt"></i> İçeriği Güncelle
+                            </button>
+                        </div>
+
+                        <div class="alert alert-info" style="margin-top: 20px; font-size: 0.9rem;">
+                            <i class="fas fa-info-circle"></i> Adet değişimi stoktan düşülür/iade edilir. Ürün silinirse
+                            stok iade edilir.
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

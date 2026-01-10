@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${secilenKategori != null ? secilenKategori.ad + ' Ürünleri' : 'Mağazalar'} + ' - Mağaza Sistemi'">
+        Mağazalar</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- FILTER BUTTONS -->
+            <div class="filter-buttons">
+                <a th:href="@{/magazalar}" th:class="${kategoriId == null ? 'filter-btn active' : 'filter-btn'}">
+                    <i class="fas fa-th-large"></i> Tümü
+                </a>
+                <a th:each="kategori : ${kategoriler}" th:href="@{/magazalar(kategoriId=${kategori.id})}"
+                    th:class="${kategoriId == kategori.id ? 'filter-btn active' : 'filter-btn'}">
+                    <i
+                        th:class="${kategori.id == 1 ? 'fas fa-male' : kategori.id == 2 ? 'fas fa-female' : 'fas fa-child'}"></i>
+                    <span th:text="${kategori.ad}">Kategori</span>
+                </a>
+            </div>
+
+            <!-- PAGE HEADER - KATEGORİ SEÇİLİYSE -->
+            <div th:if="${secilenKategori != null}" class="page-header">
+                <h1>
+                    <i
+                        th:class="${secilenKategori.id == 1 ? 'fas fa-male' : secilenKategori.id == 2 ? 'fas fa-female' : 'fas fa-child'}"></i>
+                    <span th:text="${secilenKategori.ad}">Kategori</span> Ürünleri
+                </h1>
+                <p>Tüm mağazalardan <span th:text="${secilenKategori.ad}">kategori</span> ürünleri</p>
+            </div>
+
+            <!-- PAGE HEADER - KATEGORİ SEÇİLİ DEĞİLSE -->
+            <div th:if="${secilenKategori == null}" class="page-header">
+                <h1><i class="fas fa-store"></i> Mağazalar</h1>
+                <p>En sevdiğiniz markalardan alışveriş yapın</p>
+            </div>
+
+            <!-- ÜRÜNLER - KATEGORİ SEÇİLİYSE -->
+            <div th:if="${secilenKategori != null && urunler != null}">
+                <div th:if="${!#lists.isEmpty(urunler)}" class="grid-4">
+                    <div th:each="urun : ${urunler}" class="product-card">
+                        <div
+                            style="height: 200px; background: linear-gradient(135deg, var(--gray-200) 0%, var(--gray-300) 100%); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                            <i class="fas fa-tshirt"
+                                style="font-size: 4rem; color: var(--primary-color); opacity: 0.7;"></i>
+                        </div>
+
+                        <div class="product-body">
+                            <span class="badge badge-primary" th:text="${urun.magaza.ad}"
+                                style="margin-bottom: 12px;">Mağaza</span>
+                            <div class="product-title" th:text="${urun.ad}">Ürün Adı</div>
+                            <div class="product-desc" th:text="${urun.aciklama}">Ürün açıklaması</div>
+
+                            <div class="product-footer">
+                                <div class="price-tag" th:text="${urun.fiyat} + ' ₺'">199.99 ₺</div>
+
+                                <!-- OWNER ACTIONS -->
+                                <th:block th:if="${kullanici != null and urun.magaza.sahip.id == kullanici.id}">
+                                    <a th:href="@{/sahip/magaza/{magazaId}/urun-duzenle/{urunId}(magazaId=${urun.magaza.id}, urunId=${urun.id})}"
+                                        class="btn btn-warning btn-sm"
+                                        style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); color: white; border: none;">
+                                        <i class="fas fa-edit"></i> Düzenle
+                                    </a>
+                                </th:block>
+
+                                <!-- CUSTOMER ACTIONS -->
+                                <th:block th:unless="${kullanici != null and urun.magaza.sahip.id == kullanici.id}">
+                                    <a th:href="@{/urun/{id}(id=${urun.id})}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye"></i> İncele
+                                    </a>
+                                </th:block>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div th:if="${#lists.isEmpty(urunler)}" class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>Bu kategoride henüz ürün bulunmuyor</h3>
+                    <p>Farklı bir kategori seçmeyi deneyin</p>
+                </div>
+            </div>
+
+            <!-- MAĞAZALAR - KATEGORİ SEÇİLİ DEĞİLSE -->
+            <div th:if="${secilenKategori == null}">
+                <div class="grid-3">
+                    <div th:each="magaza : ${magazalar}" class="store-card">
+                        <div th:if="${magaza.logoUrl != null}" class="store-logo"
+                            style="background: white; padding: 10px;">
+                            <img th:src="@{${magaza.logoUrl}}" th:alt="${magaza.ad}"
+                                style="width: 100%; height: 100%; object-fit: contain;">
+                        </div>
+                        <div th:if="${magaza.logoUrl == null}" class="store-logo"
+                            th:text="${#strings.substring(magaza.ad, 0, 1)}">M</div>
+                        <h3 th:text="${magaza.ad}">Mağaza Adı</h3>
+                        <p th:text="${magaza.aciklama}">Mağaza açıklaması</p>
+                        <a th:href="@{/magazalar/{id}(id=${magaza.id})}" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-arrow-right"></i> Ürünleri Gör
+                        </a>
+                    </div>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div th:if="${#lists.isEmpty(magazalar)}" class="empty-state">
+                    <i class="fas fa-store-slash"></i>
+                    <h3>Henüz mağaza bulunmuyor</h3>
+                    <p>Yakında yeni mağazalar eklenecek</p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- AI Chat Widget -->
+    <th:block th:insert="~{fragments/ai-chat-widget}"></th:block>
+
+</body>
+
+</html>

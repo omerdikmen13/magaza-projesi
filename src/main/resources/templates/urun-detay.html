@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${urun.ad} + ' - Mağaza Sistemi'">Ürün Detay</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .product-gallery {
+            position: relative;
+            border-radius: var(--radius-xl);
+            overflow: hidden;
+            background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%);
+        }
+
+        .product-image {
+            height: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .product-image i {
+            font-size: 10rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .product-badges {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .product-badge {
+            padding: 8px 16px;
+            border-radius: var(--radius-full);
+            font-size: 0.85rem;
+            font-weight: 600;
+            backdrop-filter: blur(10px);
+        }
+
+        .badge-store {
+            background: rgba(0, 184, 148, 0.9);
+            color: white;
+        }
+
+        .badge-category {
+            background: rgba(102, 126, 234, 0.9);
+            color: white;
+        }
+
+        .product-info {
+            padding: 10px 0;
+        }
+
+        .product-title {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 16px;
+            line-height: 1.3;
+        }
+
+        .product-description {
+            font-size: 1.1rem;
+            color: var(--gray-600);
+            line-height: 1.7;
+            margin-bottom: 28px;
+        }
+
+        .product-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 24px;
+            margin-bottom: 32px;
+            padding: 20px 0;
+            border-top: 1px solid var(--gray-200);
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .meta-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .meta-icon i {
+            color: var(--primary-color);
+        }
+
+        .meta-label {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+        }
+
+        .meta-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .product-price {
+            margin-bottom: 32px;
+        }
+
+        .price-tag {
+            font-size: 3rem;
+            font-weight: 800;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .price-label {
+            font-size: 1.2rem;
+            color: var(--gray-600);
+            margin-left: 4px;
+        }
+
+        .add-to-cart-section {
+            background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: 28px;
+        }
+
+        .size-selector {
+            margin-bottom: 24px;
+        }
+
+        .size-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .size-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .size-option {
+            position: relative;
+        }
+
+        .size-option input {
+            position: absolute;
+            opacity: 0;
+        }
+
+        .size-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-width: 70px;
+            padding: 14px 18px;
+            background: white;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .size-option label:hover {
+            border-color: var(--primary-color);
+        }
+
+        .size-option input:checked+label {
+            background: var(--gradient-primary);
+            border-color: transparent;
+            color: white;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.35);
+        }
+
+        .size-option input:checked+label .size-stock {
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .size-option input:disabled+label {
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: var(--gray-100);
+        }
+
+        .size-name {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .size-stock {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .quantity-selector {
+            margin-bottom: 24px;
+        }
+
+        .quantity-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 12px;
+        }
+
+        .quantity-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .quantity-input input {
+            width: 100px;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: 600;
+            padding: 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+        }
+
+        .quantity-input input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .add-to-cart-btn {
+            width: 100%;
+            padding: 18px 32px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .add-to-cart-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.5);
+        }
+
+        .login-prompt {
+            text-align: center;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
+            border: 2px dashed var(--gray-300);
+            border-radius: var(--radius-xl);
+        }
+
+        .login-prompt i {
+            font-size: 3rem;
+            color: var(--gray-400);
+            margin-bottom: 16px;
+        }
+
+        .login-prompt p {
+            color: var(--gray-600);
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/magazalar/{id}(id=${urun.magaza.id})}" class="back-link">
+                <i class="fas fa-arrow-left"></i>
+                <span th:text="${urun.magaza.ad}"></span> Mağazasına Dön
+            </a>
+
+            <!-- ALERTS -->
+            <div th:if="${hata}" class="alert alert-error" style="margin-top: 20px;">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${hata}"></span>
+            </div>
+            <div th:if="${basari}" class="alert alert-success" style="margin-top: 20px;">
+                <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+            </div>
+
+            <!-- DIFFERENT STORE WARNING MODAL -->
+            <div th:if="${farkliMagazaUyari}" class="modal-overlay" id="farkliMagazaModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--warning);"></i>
+                        <h2 style="margin-top: 16px;">Farklı Mağaza Uyarısı</h2>
+                    </div>
+                    <div class="modal-body">
+                        <p>Sepetinizde <strong th:text="${mevcutMagaza}">Mavi</strong> mağazasından ürünler var.</p>
+                        <p style="margin-top: 10px;"><strong th:text="${yeniMagaza}">Koton</strong> mağazasından ürün
+                            eklemek için sepetiniz boşaltılacak.</p>
+                        <p style="margin-top: 20px; color: var(--gray-600);">Devam etmek istiyor musunuz?</p>
+                    </div>
+                    <div class="modal-footer">
+                        <a th:href="@{/sepet}" class="btn btn-secondary">
+                            <i class="fas fa-shopping-cart"></i> Sepete Git
+                        </a>
+                        <form th:action="@{/urun/{id}/sepete-ekle(id=${urun.id})}" method="post"
+                            style="display: inline;">
+                            <input type="hidden" name="bedenId" th:value="${bekleyenBedenId}">
+                            <input type="hidden" name="adet" th:value="${bekleyenAdet}">
+                            <input type="hidden" name="farkliMagazaOnay" value="true">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-trash"></i> Sepeti Boşalt ve Ekle
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT DETAIL -->
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 50px; margin-top: 30px;">
+
+                <!-- PRODUCT GALLERY -->
+                <div class="product-gallery">
+                    <div class="product-badges">
+                        <span class="product-badge badge-store" th:text="${urun.magaza.ad}">Koton</span>
+                        <span class="product-badge badge-category" th:text="${urun.altKategori.ad}">Tişört</span>
+                    </div>
+                    <div class="product-image">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                </div>
+
+                <!-- PRODUCT INFO -->
+                <div class="product-info">
+                    <h1 class="product-title" th:text="${urun.ad}">Ürün Adı</h1>
+                    <p class="product-description" th:text="${urun.aciklama}">Ürün açıklaması burada yer alır.</p>
+
+                    <div class="product-meta">
+                        <div class="meta-item">
+                            <div class="meta-icon"><i class="fas fa-tags"></i></div>
+                            <div>
+                                <div class="meta-label">Kategori</div>
+                                <div class="meta-value" th:text="${urun.altKategori.kategori.ad}">Erkek</div>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon"><i class="fas fa-layer-group"></i></div>
+                            <div>
+                                <div class="meta-label">Alt Kategori</div>
+                                <div class="meta-value" th:text="${urun.altKategori.ad}">Tişört</div>
+                            </div>
+                        </div>
+                        <div class="meta-item">
+                            <div class="meta-icon"><i class="fas fa-palette"></i></div>
+                            <div>
+                                <div class="meta-label">Renk</div>
+                                <div class="meta-value" th:text="${urun.renk}">Beyaz</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="product-price"
+                        style="display: flex; align-items: center; justify-content: space-between;">
+                        <div>
+                            <span class="price-tag" th:text="${#numbers.formatDecimal(urun.fiyat, 1, 2)}">149.99</span>
+                            <span class="price-label">TL</span>
+                        </div>
+
+                        <!-- FAVORİ BUTONU (Sadece giriş yapmış müşteriler için) -->
+                        <form sec:authorize="isAuthenticated()"
+                            th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}"
+                            th:action="@{/favori/toggle/{id}(id=${urun.id})}" method="post" style="margin: 0;">
+                            <button type="submit" class="favorite-btn" th:classappend="${isFavorite ? 'favorited' : ''}"
+                                style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #f43f5e; 
+                                           background: white; cursor: pointer; transition: all 0.3s ease; display: flex; 
+                                           align-items: center; justify-content: center;">
+                                <i class="fas fa-heart"
+                                    th:style="${isFavorite ? 'color: #f43f5e; font-size: 1.5rem;' : 'color: #fda4af; font-size: 1.5rem;'}"></i>
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- ADD TO CART SECTION (Only for Customers) -->
+                    <form sec:authorize="isAuthenticated()"
+                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}"
+                        th:action="@{/urun/{id}/sepete-ekle(id=${urun.id})}" method="post" class="add-to-cart-section">
+
+                        <div class="size-selector">
+                            <div class="size-title">
+                                <i class="fas fa-ruler"></i> Beden Seçin
+                            </div>
+                            <div class="size-options">
+                                <div th:each="stok : ${stoklar}" class="size-option">
+                                    <input type="radio" th:id="${'beden-' + stok.beden.id}" name="bedenId"
+                                        th:value="${stok.beden.id}" th:disabled="${stok.adet == 0}" required>
+                                    <label th:for="${'beden-' + stok.beden.id}">
+                                        <span class="size-name" th:text="${stok.beden.ad}">M</span>
+                                        <span class="size-stock"
+                                            th:text="${stok.adet == 0 ? 'Tükendi' : stok.adet + ' adet'}">10 adet</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="quantity-selector">
+                            <div class="quantity-title">Adet</div>
+                            <div class="quantity-input">
+                                <input type="number" name="adet" min="1" max="10" value="1" required>
+                                <span style="color: var(--gray-500);">Maksimum 10 adet</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="add-to-cart-btn">
+                            <i class="fas fa-cart-plus"></i> Sepete Ekle
+                        </button>
+                    </form>
+
+                    <!-- STORE OWNER VIEW (Own Product) -->
+                    <div sec:authorize="isAuthenticated()"
+                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI and urun.magaza.sahip.id == kullanici.id}"
+                        class="add-to-cart-section" style="text-align: center; border-color: var(--warning);">
+                        <i class="fas fa-user-tie"
+                            style="font-size: 3rem; color: var(--warning); margin-bottom: 15px;"></i>
+                        <h3 style="margin-bottom: 10px;">Ürün Yönetimi</h3>
+                        <p style="margin-bottom: 20px;">Bu ürün sizin mağazanıza aittir.</p>
+
+                        <a th:href="@{/sahip/magaza/{magazaId}/urun-duzenle/{urunId}(magazaId=${urun.magaza.id}, urunId=${urun.id})}"
+                            class="btn btn-warning"
+                            style="width: 100%; padding: 15px; background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); border: none; font-size: 1.1rem;">
+                            <i class="fas fa-edit"></i> Ürünü Düzenle
+                        </a>
+                    </div>
+
+                    <!-- STORE OWNER VIEW (Other Product) -->
+                    <div sec:authorize="isAuthenticated()"
+                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI and urun.magaza.sahip.id != kullanici.id}"
+                        class="add-to-cart-section" style="text-align: center; background: #f8f9fa;">
+                        <i class="fas fa-store"
+                            style="font-size: 3rem; color: var(--gray-400); margin-bottom: 15px;"></i>
+                        <h3 style="margin-bottom: 10px; color: var(--gray-600);">İnceleme Modu</h3>
+                        <p>Mağaza sahibi hesabıyla diğer mağazaları görüntülüyorsunuz.</p>
+                    </div>
+
+                    <!-- ADMIN VIEW - Full Control -->
+                    <div sec:authorize="isAuthenticated()"
+                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).ADMIN}"
+                        class="add-to-cart-section" style="text-align: center; border-color: #e74c3c;">
+                        <i class="fas fa-shield-alt" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i>
+                        <h3 style="margin-bottom: 10px; color: #e74c3c;">Admin Kontrolü</h3>
+                        <p style="margin-bottom: 20px; color: var(--gray-600);">Bu ürünü düzenleyebilir veya
+                            silebilirsiniz.</p>
+
+                        <div style="display: flex; gap: 15px; justify-content: center;">
+                            <a th:href="@{/admin/urun/{id}/duzenle(id=${urun.id})}" class="btn btn-primary"
+                                style="padding: 15px 30px; font-size: 1.1rem;">
+                                <i class="fas fa-edit"></i> Ürünü Düzenle
+                            </a>
+                            <form th:action="@{/admin/urun/{id}/sil(id=${urun.id})}" method="post"
+                                style="display: inline;" onsubmit="return confirmDelete(event, this);">
+                                <button type="submit" class="btn btn-danger"
+                                    style="padding: 15px 30px; font-size: 1.1rem;">
+                                    <i class="fas fa-trash"></i> Pasife Al
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- LOGIN PROMPT (Not Authenticated) -->
+                    <div sec:authorize="!isAuthenticated()" class="login-prompt">
+                        <i class="fas fa-lock"></i>
+                        <p>Sepete eklemek için lütfen giriş yapın</p>
+                        <a th:href="@{/giris}" class="btn btn-primary" style="padding: 14px 40px;">
+                            <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function confirmDelete(e, form) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'Emin misiniz?',
+                text: "Bu ürünü pasife almak istediğinize emin misiniz?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ff4d4d',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, Pasife Al',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
+            return false;
+        }
+    </script>
+
+    <!-- AI Chat Widget -->
+    <th:block th:insert="~{fragments/ai-chat-widget}"></th:block>
+
+</body>
+
+</html>

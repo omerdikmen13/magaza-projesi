@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Ekle - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .size-stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .size-stock-item {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .size-stock-item:focus-within {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .size-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .stock-input {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip/magaza/{id}(id=${magaza.id})}" class="back-link">
+                <i class="fas fa-arrow-left"></i> <span th:text="${magaza.ad}"></span> Yönetimine Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin: 30px 0 40px;">
+                <h1><i class="fas fa-plus-circle"></i> Yeni Ürün Ekle</h1>
+                <p><span th:text="${magaza.ad}">Mağaza</span> mağazasına yeni ürün ekleyin</p>
+            </div>
+
+            <!-- ADD PRODUCT FORM -->
+            <form th:action="@{/sahip/magaza/{id}/urun-ekle(id=${magaza.id})}" method="post">
+                <div class="grid-2" style="gap: 30px;">
+
+                    <!-- LEFT COLUMN - Product Info -->
+                    <div class="card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-info-circle text-gradient"></i> Ürün Bilgileri
+                        </h3>
+
+                        <div class="form-group">
+                            <label class="form-label" for="ad">
+                                <i class="fas fa-tag"></i> Ürün Adı *
+                            </label>
+                            <input type="text" id="ad" name="ad" class="form-control" required
+                                placeholder="Örn: Slim Fit Tişört, Chino Pantolon...">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="aciklama">
+                                <i class="fas fa-align-left"></i> Ürün Açıklaması *
+                            </label>
+                            <textarea id="aciklama" name="aciklama" class="form-control" rows="4" required
+                                placeholder="Ürün özelliklerini, kumaş bilgisini ve diğer detayları yazın..."></textarea>
+                        </div>
+
+                        <div class="grid-2" style="gap: 20px;">
+                            <div class="form-group">
+                                <label class="form-label" for="fiyat">
+                                    <i class="fas fa-lira-sign"></i> Fiyat (TL) *
+                                </label>
+                                <input type="number" id="fiyat" name="fiyat" class="form-control" required step="0.01"
+                                    min="0" placeholder="199.99">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="renk">
+                                    <i class="fas fa-palette"></i> Renk *
+                                </label>
+                                <input type="text" id="renk" name="renk" class="form-control" required
+                                    placeholder="Örn: Beyaz, Lacivert, Siyah...">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="resimUrl">
+                                <i class="fas fa-image"></i> Ürün Resmi URL
+                            </label>
+                            <input type="text" id="resimUrl" name="resimUrl" class="form-control"
+                                placeholder="https://example.com/urun-resmi.jpg (opsiyonel)">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="altKategoriId">
+                                <i class="fas fa-layer-group"></i> Kategori *
+                            </label>
+                            <select id="altKategoriId" name="altKategoriId" class="form-control" required>
+                                <option value="">Kategori seçin...</option>
+                                <optgroup th:each="kategori : ${kategoriler}" th:label="${kategori.ad}">
+                                    <option th:each="altKat : ${altKategoriler}"
+                                        th:if="${altKat.kategori.id == kategori.id}" th:value="${altKat.id}"
+                                        th:text="${altKat.ad}">Alt Kategori</option>
+                                </optgroup>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN - Stock -->
+                    <div class="card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-boxes text-gradient"></i> Beden ve Stok
+                        </h3>
+
+                        <p style="color: var(--gray-600); margin-bottom: 20px;">
+                            Her beden için stok adedini girin. Stoksuz bedenleri 0 olarak bırakabilirsiniz.
+                        </p>
+
+                        <div class="size-stock-grid">
+                            <div th:each="beden : ${bedenler}" class="size-stock-item">
+                                <input type="hidden" name="bedenIds" th:value="${beden.id}">
+                                <div class="size-label" th:text="${beden.ad}">M</div>
+                                <input type="number" name="stoklar" class="stock-input" min="0" value="0"
+                                    placeholder="Adet">
+                            </div>
+                        </div>
+
+                        <div class="alert"
+                            style="background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%); border: none; margin-top: 24px;">
+                            <i class="fas fa-lightbulb" style="color: var(--primary-color);"></i>
+                            <span style="color: var(--gray-700);">En az bir beden için stok girmeniz gerekiyor.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <div style="margin-top: 30px; text-align: center;">
+                    <button type="submit" class="btn btn-primary" style="padding: 16px 60px; font-size: 1.1rem;">
+                        <i class="fas fa-check"></i> Ürünü Kaydet
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

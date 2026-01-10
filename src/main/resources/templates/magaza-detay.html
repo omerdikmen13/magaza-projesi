@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${magaza.ad} + ' - Ürünler'">Mağaza Ürünleri</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK BUTTON - Role göre -->
+            <a th:if="${kullanici != null and kullanici.rol.name() == 'MAGAZA_SAHIBI'}"
+                th:href="@{/sahip/magaza/{id}(id=${magaza.id})}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Panele Dön
+            </a>
+            <a th:if="${kullanici == null or kullanici.rol.name() != 'MAGAZA_SAHIBI'}" th:href="@{/magazalar}"
+                class="back-link">
+                <i class="fas fa-arrow-left"></i> Mağazalara Dön
+            </a>
+
+            <!-- STORE HEADER -->
+            <div class="page-header" style="margin-bottom: 40px;">
+                <h1>
+                    <i class="fas fa-store"></i>
+                    <span th:text="${magaza.ad}">Mağaza</span>
+                </h1>
+                <p th:text="${magaza.aciklama}">Mağaza açıklaması</p>
+            </div>
+
+            <!-- FILTER BUTTONS -->
+            <div class="filter-buttons">
+                <a th:href="@{/magazalar/{id}(id=${magaza.id})}"
+                    th:class="${kategoriId == null ? 'filter-btn active' : 'filter-btn'}">
+                    <i class="fas fa-th-large"></i> Tümü
+                </a>
+                <a th:each="kategori : ${kategoriler}"
+                    th:href="@{/magazalar/{id}(id=${magaza.id}, kategoriId=${kategori.id})}"
+                    th:class="${kategoriId == kategori.id ? 'filter-btn active' : 'filter-btn'}">
+                    <i
+                        th:class="${kategori.id == 1 ? 'fas fa-male' : kategori.id == 2 ? 'fas fa-female' : 'fas fa-child'}"></i>
+                    <span th:text="${kategori.ad}">Kategori</span>
+                </a>
+            </div>
+
+            <!-- PRICE SORTING -->
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin: 30px 0; flex-wrap: wrap; gap: 15px;">
+                <div style="color: var(--gray-600);">
+                    <i class="fas fa-box"></i>
+                    <span th:text="${#lists.size(urunler)} + ' ürün bulundu'">0 ürün bulundu</span>
+                </div>
+                <form th:action="@{/magazalar/{id}(id=${magaza.id})}" method="get"
+                    style="display: flex; gap: 12px; align-items: center;">
+                    <input type="hidden" name="kategoriId" th:value="${kategoriId}" th:if="${kategoriId != null}">
+                    <label style="color: var(--gray-600); font-weight: 500;">
+                        <i class="fas fa-sort"></i> Sırala:
+                    </label>
+                    <select name="siralama" onchange="this.form.submit()"
+                        style="padding: 10px 16px; border: 2px solid var(--gray-200); border-radius: 10px; font-size: 0.95rem; background: white; cursor: pointer; min-width: 180px;">
+                        <option value="">Varsayılan</option>
+                        <option value="fiyat-artan" th:selected="${siralama == 'fiyat-artan'}">Fiyat: Düşükten Yükseğe
+                        </option>
+                        <option value="fiyat-azalan" th:selected="${siralama == 'fiyat-azalan'}">Fiyat: Yüksekten Düşüğe
+                        </option>
+                    </select>
+                </form>
+            </div>
+
+            <!-- PRODUCTS GRID -->
+            <div th:if="${!#lists.isEmpty(urunler)}" class="grid-4">
+                <div th:each="urun : ${urunler}" class="product-card">
+                    <div
+                        style="height: 200px; background: linear-gradient(135deg, var(--gray-200) 0%, var(--gray-300) 100%); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                        <i class="fas fa-tshirt"
+                            style="font-size: 4rem; color: var(--primary-color); opacity: 0.7;"></i>
+                    </div>
+
+                    <div class="product-body">
+                        <div class="product-title" th:text="${urun.ad}">Ürün Adı</div>
+                        <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                            <span class="badge badge-primary" th:text="${urun.altKategori.kategori.ad}">Erkek</span>
+                            <span class="badge badge-success" th:text="${urun.altKategori.ad}">Tişört</span>
+                        </div>
+                        <div class="product-desc" th:text="${urun.aciklama}">Ürün açıklaması</div>
+
+                        <div class="product-footer">
+                            <div class="price-tag" th:text="${urun.fiyat} + ' ₺'">199.99 ₺</div>
+                            <a th:href="@{/urun/{id}(id=${urun.id})}" class="btn btn-primary btn-sm">
+                                <i class="fas fa-eye"></i> İncele
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div th:if="${#lists.isEmpty(urunler)}" class="empty-state">
+                <i class="fas fa-box-open"></i>
+                <h3>Bu kategoride henüz ürün bulunmuyor</h3>
+                <p>Farklı bir kategori seçmeyi deneyin</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- CHAT BUTTON - Sadece Müşteriler için -->
+    <a th:if="${kullanici != null and kullanici.rol.name() == 'MUSTERI'}" th:href="@{/sohbet/{id}(id=${magaza.id})}"
+        style="position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; 
+               background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+               border-radius: 50%; display: flex; align-items: center; justify-content: center;
+               color: white; font-size: 1.5rem; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+               text-decoration: none; transition: all 0.3s ease; z-index: 1000;"
+        onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'"
+        title="Mağaza ile İletişim">
+        <i class="fas fa-comments"></i>
+    </a>
+
+</body>
+
+</html>

@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesajlarım - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chat-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+        }
+
+        .chat-item:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .chat-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        .chat-info {
+            flex: 1;
+        }
+
+        .chat-name {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 4px;
+        }
+
+        .chat-preview {
+            color: var(--gray-500);
+            font-size: 0.9rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 400px;
+        }
+
+        .chat-time {
+            color: var(--gray-400);
+            font-size: 0.85rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin-bottom: 30px;">
+                <h1><i class="fas fa-comments"></i> Mesajlarım</h1>
+                <p>Mağazalarla olan sohbetleriniz</p>
+            </div>
+
+            <!-- SOHBET LİSTESİ -->
+            <div class="chat-list">
+                <th:block th:if="${sohbetler != null and !sohbetler.empty}">
+                    <a th:each="mesaj : ${sohbetler}" th:href="@{/sohbet/{id}(id=${mesaj.magaza.id})}"
+                        class="chat-item">
+                        <div class="chat-avatar" th:text="${#strings.substring(mesaj.magaza.ad, 0, 1)}">M</div>
+                        <div class="chat-info">
+                            <div class="chat-name" th:text="${mesaj.magaza.ad}">Mağaza Adı</div>
+                            <div class="chat-preview" th:text="${mesaj.icerik}">Son mesaj...</div>
+                        </div>
+                        <div class="chat-time" th:text="${#temporals.format(mesaj.tarih, 'dd.MM HH:mm')}">01.01 12:00
+                        </div>
+                    </a>
+                </th:block>
+
+                <!-- EMPTY STATE -->
+                <div th:if="${sohbetler == null or sohbetler.empty}" class="empty-state" style="padding: 60px;">
+                    <i class="fas fa-comments"
+                        style="font-size: 3rem; color: var(--gray-300); margin-bottom: 20px;"></i>
+                    <h3>Henüz mesajınız yok</h3>
+                    <p style="color: var(--gray-500);">Mağaza sayfalarından satıcılarla iletişime geçebilirsiniz</p>
+                    <a th:href="@{/magazalar}" class="btn btn-primary" style="margin-top: 20px;">
+                        <i class="fas fa-store"></i> Mağazalara Git
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

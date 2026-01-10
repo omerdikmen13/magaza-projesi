@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${magaza.ad} + ' ile Sohbet'">Sohbet</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .chat-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 20px;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            margin-bottom: 20px;
+        }
+
+        .chat-header-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        .chat-messages {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            min-height: 400px;
+            max-height: 500px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            position: relative;
+        }
+
+        .message.sent {
+            background: var(--gradient-primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 6px;
+        }
+
+        .message.received {
+            background: var(--gray-100);
+            color: var(--dark);
+            align-self: flex-start;
+            border-bottom-left-radius: 6px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .chat-input {
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 16px 20px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            font-size: 1rem;
+        }
+
+        .chat-input input:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        .empty-chat {
+            text-align: center;
+            color: var(--gray-400);
+            padding: 60px 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/mesajlarim}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Mesajlarıma Dön
+            </a>
+
+            <div class="chat-container">
+                <!-- CHAT HEADER -->
+                <div class="chat-header">
+                    <div class="chat-header-avatar" th:text="${#strings.substring(magaza.ad, 0, 1)}">M</div>
+                    <div>
+                        <h2 th:text="${magaza.ad}" style="margin: 0;">Mağaza</h2>
+                        <span style="color: var(--gray-500); font-size: 0.9rem;">
+                            <i class="fas fa-circle" style="color: #27ae60; font-size: 0.5rem;"></i> Çevrimiçi
+                        </span>
+                    </div>
+                </div>
+
+                <!-- MESAJLAR -->
+                <div class="chat-messages" id="chatMessages">
+                    <div th:if="${mesajlar == null or mesajlar.empty}" class="empty-chat">
+                        <i class="fas fa-paper-plane" style="font-size: 2rem; margin-bottom: 12px;"></i>
+                        <p>Henüz mesaj yok. İlk mesajı gönderin!</p>
+                    </div>
+
+                    <div th:each="m : ${mesajlar}" class="message"
+                        th:classappend="${m.gonderenMusteri ? 'sent' : 'received'}">
+                        <div th:text="${m.icerik}">Mesaj içeriği</div>
+                        <div class="message-time" th:text="${#temporals.format(m.tarih, 'HH:mm')}">12:00</div>
+                    </div>
+                </div>
+
+                <!-- MESAJ GÖNDER -->
+                <form th:action="@{/mesaj/gonder}" method="post" class="chat-input">
+                    <input type="hidden" name="magazaId" th:value="${magaza.id}">
+                    <input type="text" name="icerik" placeholder="Mesajınızı yazın..." required autofocus>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Gönder
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Scroll to bottom
+        var chatMessages = document.getElementById('chatMessages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    </script>
+
+</body>
+
+</html>

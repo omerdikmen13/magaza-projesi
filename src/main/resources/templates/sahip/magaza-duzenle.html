@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mağaza Düzenle - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Panele Dön
+            </a>
+
+            <div class="card" style="max-width: 600px; margin: 40px auto; padding: 40px;">
+                <!-- HEADER -->
+                <div style="text-align: center; margin-bottom: 30px;">
+                    <h1 style="font-size: 1.8rem; margin-bottom: 10px;">
+                        <i class="fas fa-edit text-gradient"></i> Mağaza Düzenle
+                    </h1>
+                    <p style="color: var(--gray-500);">Mağaza bilgilerinizi güncelleyin</p>
+                </div>
+
+                <!-- FORM -->
+                <form th:action="@{/sahip/magaza/{id}/duzenle(id=${magaza.id})}" method="post">
+
+                    <div class="form-group">
+                        <label class="form-label" for="ad">Mağaza Adı</label>
+                        <input type="text" id="ad" name="ad" class="form-control" th:value="${magaza.ad}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="aciklama">Mağaza Açıklaması</label>
+                        <textarea id="aciklama" name="aciklama" class="form-control" rows="4" required
+                            th:text="${magaza.aciklama}"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="logoUrl">Logo URL (Opsiyonel)</label>
+                        <input type="text" id="logoUrl" name="logoUrl" class="form-control" th:value="${magaza.logoUrl}"
+                            placeholder="https://example.com/logo.png">
+                        <small style="color: var(--gray-500);">Resim linki yapıştırın</small>
+                    </div>
+
+                    <div style="margin-top: 30px; display: grid; gap: 15px;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+                            <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                        </button>
+                        <a th:href="@{/sahip}" class="btn btn-secondary" style="width: 100%; text-align: center;">
+                            İptal
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

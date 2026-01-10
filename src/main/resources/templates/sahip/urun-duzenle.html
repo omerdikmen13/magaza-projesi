@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ürün Düzenle - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .size-stock-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 16px;
+        }
+
+        .size-stock-item {
+            background: var(--gray-50);
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .size-stock-item:focus-within {
+            border-color: var(--primary-color);
+            background: white;
+        }
+
+        .size-label {
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+
+        .stock-input {
+            width: 100%;
+            text-align: center;
+            padding: 10px;
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR - Standard but Store Owner view -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip/magaza/{id}(id=${magaza.id})}" class="back-link">
+                <i class="fas fa-arrow-left"></i> <span th:text="${magaza.ad}"></span> Yönetimine Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header"
+                style="margin: 30px 0 40px; display: flex; justify-content: space-between; align-items: end; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h1><i class="fas fa-edit"></i> Ürün Düzenle</h1>
+                    <p>
+                        <span th:text="${urun.ad}">Ürün</span> bilgilerini güncelleyin
+                        <span th:if="${!urun.aktif}" class="badge"
+                            style="background: #e74c3c; margin-left: 10px;">PASİF</span>
+                        <span th:if="${urun.aktif}" class="badge"
+                            style="background: #27ae60; margin-left: 10px;">AKTİF</span>
+                    </p>
+                </div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <!-- KAYDET BUTONU -->
+                    <button type="submit" form="urunDuzenleForm" class="btn btn-success"
+                        style="background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);">
+                        <i class="fas fa-save"></i> Kaydet
+                    </button>
+
+                    <!-- AKTİF/PASİF TOGGLE -->
+                    <form th:if="${urun.aktif}" th:action="@{/sahip/urun/{id}/pasif(id=${urun.id})}" method="post"
+                        style="display: inline;">
+                        <button type="submit" class="btn" style="background: #f39c12; color: white;">
+                            <i class="fas fa-ban"></i> Pasife Al
+                        </button>
+                    </form>
+                    <form th:if="${!urun.aktif}" th:action="@{/sahip/urun/{id}/aktif(id=${urun.id})}" method="post"
+                        style="display: inline;">
+                        <button type="submit" class="btn" style="background: #27ae60; color: white;">
+                            <i class="fas fa-check"></i> Aktife Al
+                        </button>
+                    </form>
+
+                    <!-- KALICI SİL -->
+                    <form th:action="@{/sahip/urun/{id}/sil(id=${urun.id})}" method="post" style="display: inline;"
+                        onsubmit="return confirmHardDelete(event, this);">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-trash"></i> Kalıcı Sil
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- EDIT PRODUCT FORM -->
+            <form id="urunDuzenleForm"
+                th:action="@{/sahip/magaza/{magazaId}/urun-duzenle/{urunId}(magazaId=${magaza.id}, urunId=${urun.id})}"
+                method="post">
+                <div class="grid-2" style="gap: 30px;">
+
+                    <!-- LEFT COLUMN - Product Info -->
+                    <div class="card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-info-circle text-gradient"></i> Ürün Bilgileri
+                        </h3>
+
+                        <div class="form-group">
+                            <label class="form-label" for="ad">
+                                <i class="fas fa-tag"></i> Ürün Adı *
+                            </label>
+                            <input type="text" id="ad" name="ad" class="form-control" required th:value="${urun.ad}">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="aciklama">
+                                <i class="fas fa-align-left"></i> Ürün Açıklaması *
+                            </label>
+                            <textarea id="aciklama" name="aciklama" class="form-control" rows="4" required
+                                th:text="${urun.aciklama}"></textarea>
+                        </div>
+
+                        <div class="grid-2" style="gap: 20px;">
+                            <div class="form-group">
+                                <label class="form-label" for="fiyat">
+                                    <i class="fas fa-lira-sign"></i> Fiyat (TL) *
+                                </label>
+                                <input type="number" id="fiyat" name="fiyat" class="form-control" required step="0.01"
+                                    min="0" th:value="${urun.fiyat}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="renk">
+                                    <i class="fas fa-palette"></i> Renk *
+                                </label>
+                                <input type="text" id="renk" name="renk" class="form-control" required
+                                    th:value="${urun.renk}">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="resimUrl">
+                                <i class="fas fa-image"></i> Ürün Resmi URL
+                            </label>
+                            <input type="text" id="resimUrl" name="resimUrl" class="form-control"
+                                th:value="${urun.resimUrl}" placeholder="https://example.com/urun-resmi.jpg">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="altKategoriId">
+                                <i class="fas fa-layer-group"></i> Kategori *
+                            </label>
+                            <select id="altKategoriId" name="altKategoriId" class="form-control" required>
+                                <option value="">Kategori seçin...</option>
+                                <optgroup th:each="kategori : ${kategoriler}" th:label="${kategori.ad}">
+                                    <option th:each="altKat : ${altKategoriler}"
+                                        th:if="${altKat.kategori.id == kategori.id}" th:value="${altKat.id}"
+                                        th:text="${altKat.ad}" th:selected="${urun.altKategori.id == altKat.id}">Alt
+                                        Kategori</option>
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <div style="margin-top: 30px; display: grid; gap: 15px;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 14px;">
+                                <i class="fas fa-save"></i> Değişiklikleri Kaydet
+                            </button>
+                            <a th:href="@{/sahip/magaza/{id}(id=${magaza.id})}" class="btn btn-secondary"
+                                style="width: 100%; text-align: center;">
+                                İptal
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- RIGHT COLUMN - Stock -->
+                    <div class="card" style="padding: 30px;">
+                        <h3 style="margin-bottom: 24px; display: flex; align-items: center; gap: 10px;">
+                            <i class="fas fa-boxes text-gradient"></i> Beden ve Stok
+                        </h3>
+
+                        <p style="color: var(--gray-600); margin-bottom: 20px;">
+                            Stok miktarını güncellemek için ilgili alanı değiştirin.
+                        </p>
+
+                        <div class="size-stock-grid">
+                            <div th:each="beden : ${bedenler}" class="size-stock-item">
+                                <input type="hidden" name="bedenIds" th:value="${beden.id}">
+                                <div class="size-label" th:text="${beden.ad}">M</div>
+
+                                <!-- Mevcut stok değerini bul -->
+                                <th:block th:with="stokAdedi=0">
+                                    <th:block th:each="stok : ${mevcutStoklar}">
+                                        <th:block th:if="${stok.beden.id == beden.id}">
+                                            <!-- Thymeleaf variable assignment logic workaround -->
+                                        </th:block>
+                                    </th:block>
+
+                                    <!-- Simple iteration to find value -->
+                                    <input type="number" name="stoklar" class="stock-input" min="0"
+                                        th:value="${mevcutStoklar.stream().filter(s -> s.beden.id == beden.id).findFirst().map(s -> s.adet).orElse(0)}"
+                                        placeholder="Adet">
+                                </th:block>
+                            </div>
+                        </div>
+
+                        <div class="alert"
+                            style="background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%); border: none; margin-top: 24px;">
+                            <i class="fas fa-lightbulb" style="color: var(--primary-color);"></i>
+                            <span style="color: var(--gray-700);">Düzenleme sonrası stoklar güncellenecektir.</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+
+            </form>
+
+        </div>
+    </div>
+
+    <script>
+        function confirmHardDelete(e, form) {
+            e.preventDefault();
+            Swal.fire({
+                title: 'DİKKAT!',
+                text: "Bu ürünü kalıcı olarak silmek istediğinize emin misiniz? Bu işlem geri alınamaz!",
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonColor: '#e74c3c',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Evet, Kalıcı Sil',
+                cancelButtonText: 'İptal'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
+                }
+            })
+            return false;
+        }
+    </script>
+
+</body>
+
+</html>

@@ -1,0 +1,28 @@
+# ===============================================
+# ÖRNEK YAPILANDIRMA DOSYASI
+# Bu dosyayı application.properties olarak kopyala
+# ve kendi değerlerini gir
+# ===============================================
+
+# Server
+server.port=8080
+
+# MySQL - Kendi değerlerini gir
+spring.datasource.url=jdbc:mysql://localhost:3306/magazadb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+spring.datasource.username=YOUR_USERNAME
+spring.datasource.password=YOUR_PASSWORD
+spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+
+# JPA
+spring.jpa.hibernate.ddl-auto=create-drop
+spring.jpa.show-sql=false
+spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQL8Dialect
+spring.jpa.properties.hibernate.format_sql=true
+
+# Thymeleaf
+spring.thymeleaf.cache=false
+
+# Gemini AI - Kendi API key'ini gir
+# API Key almak için: https://aistudio.google.com/app/apikey
+gemini.api.key=YOUR_GEMINI_API_KEY
+gemini.model=gemini-2.0-flash-exp

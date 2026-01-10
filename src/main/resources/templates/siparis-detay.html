@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş #<span th:text="${siparis.id}">1</span> - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .order-timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            margin: 40px 0;
+            padding: 0 20px;
+        }
+
+        .order-timeline::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            left: 60px;
+            right: 60px;
+            height: 4px;
+            background: var(--gray-200);
+            z-index: 1;
+        }
+
+        .timeline-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        .timeline-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--gray-500);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-step.active .timeline-icon {
+            background: var(--gradient-primary);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .timeline-step.completed .timeline-icon {
+            background: #00B894;
+            color: white;
+        }
+
+        .timeline-label {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            font-weight: 500;
+        }
+
+        .timeline-step.active .timeline-label,
+        .timeline-step.completed .timeline-label {
+            color: var(--dark);
+            font-weight: 600;
+        }
+
+        .order-item {
+            display: flex;
+            gap: 24px;
+            padding: 24px;
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--gray-200);
+            margin-bottom: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .order-item:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary-color);
+        }
+
+        .item-image {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .item-image i {
+            font-size: 2.5rem;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .item-details {
+            flex: 1;
+        }
+
+        .item-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 8px;
+        }
+
+        .item-meta {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .item-meta span {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .item-meta span i {
+            color: var(--primary-color);
+        }
+
+        .item-pricing {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 12px;
+            border-top: 1px dashed var(--gray-200);
+        }
+
+        .unit-price {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .total-price {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #667eea08 0%, #764ba208 100%);
+            border: 2px solid var(--primary-color);
+            border-radius: var(--radius-xl);
+            padding: 32px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .summary-row:last-child {
+            border-bottom: none;
+            padding-top: 20px;
+            margin-top: 8px;
+        }
+
+        .summary-label {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+        }
+
+        .summary-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .summary-total {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .info-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .info-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            font-size: 1rem;
+            color: var(--gray-700);
+        }
+
+        .info-card h3 i {
+            color: var(--primary-color);
+        }
+
+        .info-card p {
+            font-size: 1.05rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+
+        .info-card .sub-text {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+            margin-top: 6px;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: var(--radius-full);
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .status-beklemede {
+            background: linear-gradient(135deg, #fff3e0 0%, #ffe0b2 100%);
+            color: #e65100;
+        }
+
+        .status-onaylandi {
+            background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+            color: #1565c0;
+        }
+
+        .status-teslim {
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+            color: #2e7d32;
+        }
+
+        .status-iptal {
+            background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+            color: #c62828;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/siparislerim}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Siparişlerime Dön
+            </a>
+
+            <!-- ORDER HEADER -->
+            <div class="card" style="margin-top: 20px; padding: 32px;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                            <div
+                                style="width: 50px; height: 50px; background: var(--gradient-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center;">
+                                <i class="fas fa-receipt" style="color: white; font-size: 1.3rem;"></i>
+                            </div>
+                            <div>
+                                <h1 style="font-size: 1.8rem; margin-bottom: 4px;">Sipariş #<span
+                                        th:text="${siparis.id}">1</span></h1>
+                                <p style="color: var(--gray-500); font-size: 0.9rem;">
+                                    <i class="fas fa-calendar-alt"></i>
+                                    <span
+                                        th:text="${#temporals.format(siparis.siparisTarihi, 'dd MMMM yyyy, HH:mm', new java.util.Locale('tr'))}">01
+                                        Ocak 2026</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <span class="status-badge"
+                            th:classappend="${siparis.durum.name() == 'BEKLEMEDE' ? 'status-beklemede' : 
+                                             siparis.durum.name() == 'ONAYLANDI' ? 'status-onaylandi' : 
+                                             siparis.durum.name() == 'TESLIM_EDILDI' ? 'status-teslim' : 'status-iptal'}">
+                            <i
+                                th:class="${siparis.durum.name() == 'BEKLEMEDE' ? 'fas fa-clock' : 
+                                          siparis.durum.name() == 'ONAYLANDI' ? 'fas fa-check' : 
+                                          siparis.durum.name() == 'TESLIM_EDILDI' ? 'fas fa-box-open' : 'fas fa-times'}"></i>
+                            <span th:text="${siparis.durum}">BEKLEMEDE</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- ORDER TIMELINE -->
+                <div class="order-timeline">
+                    <div class="timeline-step"
+                        th:classappend="${siparis.durum.name() == 'BEKLEMEDE' ? 'active' : 'completed'}">
+                        <div class="timeline-icon"><i class="fas fa-shopping-cart"></i></div>
+                        <span class="timeline-label">Sipariş Alındı</span>
+                    </div>
+                    <div class="timeline-step"
+                        th:classappend="${siparis.durum.name() == 'ONAYLANDI' ? 'active' : (siparis.durum.name() == 'TESLIM_EDILDI' ? 'completed' : '')}">
+                        <div class="timeline-icon"><i class="fas fa-check-circle"></i></div>
+                        <span class="timeline-label">Onaylandı</span>
+                    </div>
+                    <div class="timeline-step"
+                        th:classappend="${siparis.durum.name() == 'KARGODA' ? 'active' : (siparis.durum.name() == 'TESLIM_EDILDI' ? 'completed' : '')}">
+                        <div class="timeline-icon"><i class="fas fa-truck"></i></div>
+                        <span class="timeline-label">Kargoda</span>
+                    </div>
+                    <div class="timeline-step"
+                        th:classappend="${siparis.durum.name() == 'TESLIM_EDILDI' ? 'active completed' : ''}">
+                        <div class="timeline-icon"><i class="fas fa-home"></i></div>
+                        <span class="timeline-label">Teslim Edildi</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- INFO CARDS -->
+            <div class="grid-2" style="gap: 24px; margin: 30px 0;">
+                <div class="info-card">
+                    <h3><i class="fas fa-store"></i> Mağaza Bilgileri</h3>
+                    <p th:text="${siparis.magaza.ad}">Koton</p>
+                    <p class="sub-text" th:text="${siparis.magaza.aciklama}">Türkiye'nin öncü moda markası</p>
+                </div>
+                <div class="info-card">
+                    <h3><i class="fas fa-map-marker-alt"></i> Teslimat Adresi</h3>
+                    <p th:text="${siparis.teslimatAdresi != null ? siparis.teslimatAdresi : 'Adres belirtilmemiş'}">
+                        Adres</p>
+                </div>
+            </div>
+
+            <!-- ORDER ITEMS -->
+            <div style="margin-bottom: 30px;">
+                <h2 style="display: flex; align-items: center; gap: 12px; margin-bottom: 24px;">
+                    <i class="fas fa-box text-gradient"></i> Sipariş Detayları
+                    <span class="badge badge-primary" th:text="${#lists.size(detaylar)} + ' ürün'">3 ürün</span>
+                </h2>
+
+                <div th:each="detay : ${detaylar}" class="order-item">
+                    <div class="item-image">
+                        <i class="fas fa-tshirt"></i>
+                    </div>
+                    <div class="item-details">
+                        <h3 class="item-title" th:text="${detay.urun.ad}">Ürün Adı</h3>
+                        <div class="item-meta">
+                            <span><i class="fas fa-ruler"></i> Beden: <strong
+                                    th:text="${detay.beden.ad}">M</strong></span>
+                            <span><i class="fas fa-layer-group"></i> Adet: <strong
+                                    th:text="${detay.adet}">1</strong></span>
+                        </div>
+                        <div class="item-pricing">
+                            <span class="unit-price">
+                                Birim Fiyat: <span
+                                    th:text="${#numbers.formatDecimal(detay.birimFiyat, 1, 2)} + ' TL'">149.99 TL</span>
+                            </span>
+                            <span class="total-price"
+                                th:text="${#numbers.formatDecimal(detay.toplamFiyat, 1, 2)} + ' TL'">149.99 TL</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ORDER SUMMARY -->
+            <div class="summary-card">
+                <div class="summary-row">
+                    <span class="summary-label">Ara Toplam</span>
+                    <span class="summary-value"
+                        th:text="${#numbers.formatDecimal(siparis.toplamTutar, 1, 2)} + ' TL'">799.97 TL</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label">Kargo</span>
+                    <span class="summary-value" style="color: #00B894;">Ücretsiz</span>
+                </div>
+                <div class="summary-row">
+                    <span class="summary-label" style="font-size: 1.1rem; font-weight: 600; color: var(--dark);">Toplam
+                        Tutar</span>
+                    <span class="summary-total"
+                        th:text="${#numbers.formatDecimal(siparis.toplamTutar, 1, 2)} + ' TL'">799.97 TL</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

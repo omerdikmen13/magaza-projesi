@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorilerim - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page" style="padding-top: 40px;">
+
+            <!-- BAŞLIK -->
+            <div style="margin-bottom: 40px; display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <h1 style="font-size: 2rem; font-weight: 800; margin-bottom: 10px;">
+                        <i class="fas fa-heart" style="color: #f43f5e;"></i> Favorilerim
+                    </h1>
+                    <p th:if="${#lists.size(favoriler) > 0}" style="color: var(--gray-600);">
+                        <span th:text="${#lists.size(favoriler)}"></span> ürün favorilerinizde
+                    </p>
+                </div>
+                <a th:href="@{/magazalar}" class="btn btn-outline-primary">
+                    <i class="fas fa-store"></i> Alışverişe Devam
+                </a>
+            </div>
+
+            <!-- Mesajlar -->
+            <div th:if="${basari}" class="alert alert-success" style="margin-bottom: 20px;">
+                <i class="fas fa-check-circle"></i>
+                <span th:text="${basari}"></span>
+            </div>
+            <div th:if="${hata}" class="alert alert-danger" style="margin-bottom: 20px;">
+                <i class="fas fa-exclamation-circle"></i>
+                <span th:text="${hata}"></span>
+            </div>
+
+            <!-- BOŞ FAVORİLER -->
+            <div th:if="${#lists.isEmpty(favoriler)}"
+                style="text-align: center; padding: 80px 20px; background: white; border-radius: 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.08);">
+                <i class="fas fa-heart" style="font-size: 5rem; color: var(--gray-300); margin-bottom: 24px;"></i>
+                <h3 style="color: var(--gray-700); margin-bottom: 12px; font-size: 1.5rem;">Henüz favoriniz yok</h3>
+                <p style="color: var(--gray-500); max-width: 400px; margin: 0 auto 24px;">
+                    Beğendiğiniz ürünleri favorilere ekleyerek daha sonra kolayca ulaşabilirsiniz
+                </p>
+                <a th:href="@{/magazalar}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-shopping-bag"></i> Alışverişe Başla
+                </a>
+            </div>
+
+            <!-- FAVORİ ÜRÜNLERİ -->
+            <div th:if="${!#lists.isEmpty(favoriler)}" class="grid-3" style="gap: 24px;">
+                <div th:each="favori : ${favoriler}" class="card" style="overflow: hidden; position: relative;">
+
+                    <!-- Kaldır Butonu -->
+                    <form th:action="@{/favori/kaldir/{id}(id=${favori.urun.id})}" method="post"
+                        style="position: absolute; top: 16px; right: 16px; z-index: 10;">
+                        <button type="submit" class="btn" style="width: 40px; height: 40px; border-radius: 50%; background: white; 
+                                       box-shadow: 0 2px 10px rgba(0,0,0,0.15); border: none; cursor: pointer;"
+                            title="Favorilerden Kaldır">
+                            <i class="fas fa-heart" style="color: #f43f5e;"></i>
+                        </button>
+                    </form>
+
+                    <a th:href="@{/urun/{id}(id=${favori.urun.id})}" style="text-decoration: none;">
+                        <!-- Ürün Resmi -->
+                        <div style="height: 200px; overflow: hidden; background: var(--gray-100);">
+                            <img th:src="${favori.urun.resimUrl != null ? favori.urun.resimUrl : 'https://via.placeholder.com/300x200'}"
+                                th:alt="${favori.urun.ad}"
+                                style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.3s;"
+                                onmouseover="this.style.transform='scale(1.05)'"
+                                onmouseout="this.style.transform='scale(1)'">
+                        </div>
+
+                        <!-- Ürün Bilgileri -->
+                        <div style="padding: 20px;">
+                            <span
+                                style="display: inline-block; background: var(--primary-light); color: var(--primary); 
+                                         padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; margin-bottom: 10px;">
+                                <i class="fas fa-store"></i>
+                                <span th:text="${favori.urun.magaza.ad}"></span>
+                            </span>
+
+                            <h3 style="color: var(--dark); font-size: 1.1rem; margin-bottom: 8px; 
+                                       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                th:text="${favori.urun.ad}"></h3>
+
+                            <p style="color: var(--gray-500); font-size: 0.85rem; margin-bottom: 12px;">
+                                <span th:text="${favori.urun.altKategori.kategori.ad}"></span> /
+                                <span th:text="${favori.urun.altKategori.ad}"></span>
+                            </p>
+
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <span class="text-gradient" style="font-size: 1.3rem; font-weight: 800;">
+                                    ₺<span
+                                        th:text="${#numbers.formatDecimal(favori.urun.fiyat, 0, 'COMMA', 2, 'POINT')}"></span>
+                                </span>
+                                <span class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> İncele
+                                </span>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- AI Chat Widget -->
+    <th:block th:insert="~{fragments/ai-chat-widget}"></th:block>
+
+</body>
+
+</html>

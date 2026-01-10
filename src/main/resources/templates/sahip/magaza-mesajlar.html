@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${magaza.ad} + ' - Mesajlar'">Mağaza Mesajları</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+            min-height: 500px;
+        }
+
+        .customer-list {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+        }
+
+        .customer-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            border-bottom: 1px solid var(--gray-100);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            transition: background 0.2s;
+        }
+
+        .customer-item:hover,
+        .customer-item.active {
+            background: var(--gray-50);
+        }
+
+        .customer-item.active {
+            border-left: 3px solid var(--primary-color);
+        }
+
+        .chat-area {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 350px;
+        }
+
+        .message {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 16px;
+        }
+
+        .message.received {
+            background: var(--gray-100);
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.sent {
+            background: var(--gradient-primary);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+            margin-top: 4px;
+        }
+
+        .chat-input {
+            padding: 20px;
+            border-top: 1px solid var(--gray-200);
+            display: flex;
+            gap: 12px;
+        }
+
+        .chat-input input {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: var(--radius-md);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip/mesajlar}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Mesajlara Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin: 20px 0 30px;">
+                <h1><i class="fas fa-comments"></i> <span th:text="${magaza.ad}">Mağaza</span> - Mesajlar</h1>
+                <p>Müşterilerinizle sohbet edin</p>
+            </div>
+
+            <div class="chat-layout">
+                <!-- MÜŞTERİ LİSTESİ -->
+                <div class="customer-list">
+                    <div style="padding: 16px; border-bottom: 1px solid var(--gray-200); font-weight: 600;">
+                        <i class="fas fa-users"></i> Müşteriler
+                    </div>
+                    <th:block th:if="${musteriler != null and !musteriler.empty}">
+                        <a th:each="musteri : ${musteriler}"
+                            th:href="@{/sahip/mesajlar/{magazaId}(magazaId=${magaza.id}, musteriId=${musteri.id})}"
+                            class="customer-item"
+                            th:classappend="${seciliMusteri != null and seciliMusteri.id == musteri.id ? 'active' : ''}">
+                            <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;"
+                                th:text="${#strings.substring(musteri.kullaniciAdi, 0, 1).toUpperCase()}">A</div>
+                            <div>
+                                <div style="font-weight: 600;" th:text="${musteri.kullaniciAdi}">Müşteri</div>
+                                <div style="font-size: 0.85rem; color: var(--gray-500);"
+                                    th:text="${musteri.ad + ' ' + musteri.soyad}">Ad Soyad</div>
+                            </div>
+                        </a>
+                    </th:block>
+                    <div th:if="${musteriler == null or musteriler.empty}"
+                        style="padding: 40px; text-align: center; color: var(--gray-400);">
+                        <i class="fas fa-inbox"></i><br>Müşteri yok
+                    </div>
+                </div>
+
+                <!-- SOHBET ALANI -->
+                <div class="chat-area">
+                    <th:block th:if="${seciliMusteri != null}">
+                        <div class="chat-header">
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <div style="width: 45px; height: 45px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600;"
+                                    th:text="${#strings.substring(seciliMusteri.kullaniciAdi, 0, 1).toUpperCase()}">A
+                                </div>
+                                <div>
+                                    <h3 style="margin: 0;" th:text="${seciliMusteri.kullaniciAdi}">Müşteri</h3>
+                                    <span style="color: var(--gray-500); font-size: 0.9rem;"
+                                        th:text="${seciliMusteri.email}">email</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <div th:each="m : ${seciliSohbet}" class="message"
+                                th:classappend="${m.gonderenMusteri ? 'received' : 'sent'}">
+                                <div th:text="${m.icerik}">Mesaj</div>
+                                <div class="message-time" th:text="${#temporals.format(m.tarih, 'HH:mm')}">12:00</div>
+                            </div>
+                        </div>
+
+                        <form th:action="@{/mesaj/gonder}" method="post" class="chat-input">
+                            <input type="hidden" name="magazaId" th:value="${magaza.id}">
+                            <input type="hidden" name="musteriId" th:value="${seciliMusteri.id}">
+                            <input type="text" name="icerik" placeholder="Mesajınızı yazın..." required autofocus>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Gönder
+                            </button>
+                        </form>
+                    </th:block>
+
+                    <div th:if="${seciliMusteri == null}"
+                        style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--gray-400);">
+                        <i class="fas fa-comments" style="font-size: 3rem; margin-bottom: 16px;"></i>
+                        <p>Sohbet etmek için bir müşteri seçin</p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        var chatMessages = document.getElementById('chatMessages');
+        if (chatMessages) chatMessages.scrollTop = chatMessages.scrollHeight;
+    </script>
+
+</body>
+
+</html>

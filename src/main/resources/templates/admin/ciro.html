@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciro Raporu - Admin</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .ciro-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            padding: 30px;
+            text-align: center;
+            border: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .ciro-card .icon {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .ciro-card .amount {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .ciro-card .label {
+            color: var(--gray-500);
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--gray-300);
+            border-radius: 20px;
+            background: white;
+            color: var(--gray-600);
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .filter-btn.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/admin}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Admin Paneline Dön
+            </a>
+
+            <!-- PAGE HEADER & FILTERS -->
+            <div class="page-header"
+                style="margin: 20px 0 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <h1><i class="fas fa-chart-line"></i> Ciro Raporu</h1>
+                    <p>Sistem geneli gelir istatistikleri</p>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <a th:href="@{/admin/ciro(donem='TUMU')}" class="filter-btn"
+                        th:classappend="${seciliDonem == 'TUMU'} ? 'active'">Tümü</a>
+                    <a th:href="@{/admin/ciro(donem='HAFTALIK')}" class="filter-btn"
+                        th:classappend="${seciliDonem == 'HAFTALIK'} ? 'active'">Bu Hafta</a>
+                    <a th:href="@{/admin/ciro(donem='AYLIK')}" class="filter-btn"
+                        th:classappend="${seciliDonem == 'AYLIK'} ? 'active'">Bu Ay</a>
+                    <a th:href="@{/admin/ciro(donem='YILLIK')}" class="filter-btn"
+                        th:classappend="${seciliDonem == 'YILLIK'} ? 'active'">Bu Yıl</a>
+                </div>
+            </div>
+
+            <!-- CİRO KARTLARI -->
+            <div class="grid-3" style="gap: 24px; margin-bottom: 40px;">
+                <div class="ciro-card">
+                    <div class="icon"
+                        style="background: linear-gradient(135deg, #27ae6020 0%, #2ecc7120 100%); color: #27ae60;">
+                        <i class="fas fa-wallet"></i>
+                    </div>
+                    <div class="amount" style="color: #27ae60;"
+                        th:text="${#numbers.formatDecimal(toplamCiro, 0, 2)} + ' TL'">0 TL</div>
+                    <div class="label">Toplam Ciro</div>
+                </div>
+                <div class="ciro-card">
+                    <div class="icon"
+                        style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); color: #667eea;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="amount" style="color: #667eea;"
+                        th:text="${#numbers.formatDecimal(tamamlananCiro, 0, 2)} + ' TL'">0 TL</div>
+                    <div class="label">Tamamlanan</div>
+                </div>
+                <div class="ciro-card">
+                    <div class="icon"
+                        style="background: linear-gradient(135deg, #e6705620 0%, #f5af1920 100%); color: #e17056;">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <div class="amount" style="color: #e17056;"
+                        th:text="${#numbers.formatDecimal(bekleyenCiro, 0, 2)} + ' TL'">0 TL</div>
+                    <div class="label">Bekleyen</div>
+                </div>
+            </div>
+
+            <!-- MAĞAZA BAZLI CİRO -->
+            <div class="card" style="padding: 0; overflow: hidden;">
+                <div style="padding: 20px; border-bottom: 1px solid var(--gray-200);">
+                    <h2 style="display: flex; align-items: center; gap: 12px;">
+                        <i class="fas fa-store text-gradient"></i> Mağaza Performansı
+                    </h2>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--gray-100);">
+                                <th style="padding: 16px; text-align: left;">Sıra</th>
+                                <th style="padding: 16px; text-align: left;">Mağaza</th>
+                                <th style="padding: 16px; text-align: left;">Sahip</th>
+                                <th style="padding: 16px; text-align: center;">Sipariş Adedi</th>
+                                <th style="padding: 16px; text-align: right;">Ciro</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="rapor, stat : ${magazaRaporlari}"
+                                style="border-bottom: 1px solid var(--gray-200);">
+                                <td style="padding: 16px;" th:text="${stat.count}">1</td>
+                                <td style="padding: 16px;">
+                                    <div style="display: flex; align-items: center; gap: 10px;">
+                                        <div style="width: 32px; height: 32px; background: var(--gray-200); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: var(--gray-600); font-weight: 600;"
+                                            th:text="${#strings.substring(rapor.magaza.ad, 0, 1).toUpperCase()}">M</div>
+                                        <a th:href="@{/admin/siparisler(magazaId=${rapor.magaza.id})}"
+                                            style="color: var(--dark); font-weight: 600; text-decoration: none;"
+                                            th:text="${rapor.magaza.ad}" title="Bu mağazanın siparişlerini gör">Mağaza
+                                            Adı</a>
+                                    </div>
+                                </td>
+                                <td style="padding: 16px;" th:text="${rapor.magaza.sahip.kullaniciAdi}">kullanici</td>
+                                <td style="padding: 16px; text-align: center;">
+                                    <span class="badge badge-secondary" th:text="${rapor.siparisSayisi}">0</span>
+                                </td>
+                                <td
+                                    style="padding: 16px; text-align: right; font-weight: 700; color: var(--primary-color);">
+                                    <span th:text="${#numbers.formatDecimal(rapor.ciro, 0, 2)} + ' TL'">0.00 TL</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- EMPTY STATE -->
+                <div th:if="${#lists.isEmpty(magazaRaporlari)}"
+                    style="padding: 60px; text-align: center; color: var(--gray-500);">
+                    <i class="fas fa-chart-pie" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <h3>Bu dönem için veri bulunamadı</h3>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

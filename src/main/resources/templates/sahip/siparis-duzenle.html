@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sipariş Düzenle - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page" style="max-width: 1000px; margin: 0 auto;">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip/magaza/{id}/siparisler(id=${magaza.id})}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Siparişlere Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="text-align: center; margin-bottom: 40px;">
+                <h1><i class="fas fa-edit"></i> Sipariş Düzenle</h1>
+                <p>Sipariş <strong th:text="'#' + ${siparis.id}">#123</strong> bilgilerini güncelliyorsunuz</p>
+                <!-- MESSAGES -->
+                <div th:if="${basari}" class="alert alert-success" style="margin-top: 15px;">
+                    <i class="fas fa-check-circle"></i> <span th:text="${basari}"></span>
+                </div>
+                <div th:if="${hata}" class="alert alert-error" style="margin-top: 15px;">
+                    <i class="fas fa-exclamation-circle"></i> <span th:text="${hata}"></span>
+                </div>
+            </div>
+
+            <div class="grid-2" style="gap: 30px; align-items: start; grid-template-columns: 1fr 1.5fr;">
+
+                <!-- LEFT: Status & Customer Info -->
+                <div class="card" style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--gray-200); padding-bottom: 10px;">
+                        <i class="fas fa-info-circle"></i> Genel Bilgiler
+                    </h3>
+                    <form th:action="@{/sahip/siparis/{id}/durum-guncelle(id=${siparis.id})}" method="post">
+
+                        <div class="form-group">
+                            <label class="form-label">Sipariş Durumu</label>
+                            <select name="durum" class="form-control" required style="padding: 10px;">
+                                <option value="BEKLEMEDE" th:selected="${siparis.durum.name() == 'BEKLEMEDE'}">Beklemede
+                                </option>
+                                <option value="ONAYLANDI" th:selected="${siparis.durum.name() == 'ONAYLANDI'}">Onaylandı
+                                </option>
+                                <option value="HAZIRLANIYOR" th:selected="${siparis.durum.name() == 'HAZIRLANIYOR'}">
+                                    Hazırlanıyor</option>
+                                <option value="KARGODA" th:selected="${siparis.durum.name() == 'KARGODA'}">Kargoda
+                                </option>
+                                <option value="TESLIM_EDILDI" th:selected="${siparis.durum.name() == 'TESLIM_EDILDI'}">
+                                    Teslim Edildi</option>
+                                <option value="IPTAL" th:selected="${siparis.durum.name() == 'IPTAL'}">İptal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Teslimat Adresi</label>
+                            <textarea class="form-control" rows="4" readonly th:text="${siparis.teslimatAdresi}"
+                                style="background: var(--gray-50);"></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-save"></i> Durumu Güncelle
+                        </button>
+                    </form>
+
+                    <div style="margin-top: 30px;">
+                        <h4 style="margin-bottom: 10px; color: var(--gray-600);">Müşteri Bilgileri</h4>
+                        <div style="background: var(--gray-50); padding: 15px; border-radius: 8px;">
+                            <div style="font-weight: 600;"
+                                th:text="${siparis.kullanici.ad + ' ' + siparis.kullanici.soyad}">Ad Soyad</div>
+                            <div style="color: var(--gray-500); font-size: 0.9rem;"
+                                th:text="${siparis.kullanici.email}">email</div>
+                            <div style="color: var(--gray-500); font-size: 0.9rem;"
+                                th:text="${siparis.kullanici.telefon}">telefon</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h4 style="margin-bottom: 10px; color: var(--gray-600);">Sipariş Bilgileri</h4>
+                        <div style="background: var(--gray-50); padding: 15px; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span>Sipariş Tarihi:</span>
+                                <strong
+                                    th:text="${#temporals.format(siparis.siparisTarihi, 'dd.MM.yyyy HH:mm')}">01.01.2024</strong>
+                            </div>
+                            <div style="display: flex; justify-content: space-between;">
+                                <span>Toplam Tutar:</span>
+                                <strong style="color: var(--primary-color);"
+                                    th:text="${siparis.toplamTutar} + ' TL'">0.00 TL</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- RIGHT: Order Content -->
+                <div class="card" style="padding: 30px;">
+                    <h3 style="margin-bottom: 20px; border-bottom: 1px solid var(--gray-200); padding-bottom: 10px;">
+                        <i class="fas fa-shopping-basket"></i> Sipariş İçeriği
+                    </h3>
+
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                            <thead>
+                                <tr style="background: var(--gray-100); font-size: 0.9rem;">
+                                    <th style="padding: 12px; text-align: left;">Ürün</th>
+                                    <th style="padding: 12px; text-align: center;">Beden</th>
+                                    <th style="padding: 12px; text-align: right;">Fiyat</th>
+                                    <th style="padding: 12px; text-align: center;">Adet</th>
+                                    <th style="padding: 12px; text-align: right;">Toplam</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr th:each="detay : ${siparisDetaylari}"
+                                    style="border-bottom: 1px solid var(--gray-200);">
+                                    <td style="padding: 12px;">
+                                        <div style="display: flex; align-items: center; gap: 10px;">
+                                            <img th:if="${detay.urun != null and detay.urun.resimUrl != null}"
+                                                th:src="${detay.urun.resimUrl}"
+                                                style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">
+                                            <div th:if="${detay.urun == null or detay.urun.resimUrl == null}"
+                                                style="width: 50px; height: 50px; background: var(--gray-200); border-radius: 6px; display: flex; align-items: center; justify-content: center;">
+                                                <i class="fas fa-image" style="color: var(--gray-400);"></i>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 600; font-size: 0.95rem;"
+                                                    th:text="${detay.urun != null ? detay.urun.ad : 'Ürün Silinmiş'}">
+                                                    Ürün</div>
+                                                <div style="font-size: 0.8rem; color: var(--gray-500);"
+                                                    th:text="${detay.urun != null ? detay.urun.renk : '-'}">Renk</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 12px; text-align: center;">
+                                        <span class="badge"
+                                            th:text="${detay.beden != null ? detay.beden.ad : '-'}">S</span>
+                                    </td>
+                                    <td style="padding: 12px; text-align: right;"
+                                        th:text="${#numbers.formatDecimal(detay.birimFiyat, 1, 2)} + ' TL'">
+                                        100 TL
+                                    </td>
+                                    <td style="padding: 12px; text-align: center; font-weight: 600;"
+                                        th:text="${detay.adet}">1</td>
+                                    <td style="padding: 12px; text-align: right; font-weight: 600; color: var(--primary-color);"
+                                        th:text="${#numbers.formatDecimal(detay.birimFiyat * detay.adet, 1, 2)} + ' TL'">
+                                        100 TL
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div
+                        style="display: flex; justify-content: flex-end; align-items: center; padding-top: 20px; border-top: 2px solid var(--gray-200);">
+                        <div style="text-align: right;">
+                            <div style="font-size: 0.9rem; color: var(--gray-500);">Toplam Tutar</div>
+                            <div style="font-size: 1.8rem; font-weight: 700; color: var(--primary-color);"
+                                th:text="${#numbers.formatDecimal(siparis.toplamTutar, 1, 2)} + ' TL'">0.00 TL</div>
+                        </div>
+                    </div>
+
+                    <div class="alert"
+                        style="margin-top: 20px; font-size: 0.9rem; background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%); border: none;">
+                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                        <span style="color: var(--gray-700);">Sipariş içeriği görüntüleme modundadır. Sadece sipariş
+                            durumunu güncelleyebilirsiniz.</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mesajlar - Mağaza Sahibi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Panele Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin: 20px 0 30px;">
+                <h1><i class="fas fa-envelope"></i> Müşteri Mesajları</h1>
+                <p>Mağazalarınıza gelen mesajları yönetin</p>
+            </div>
+
+            <!-- MAĞAZALAR -->
+            <div th:if="${magazalar != null and !magazalar.empty}" class="grid-2" style="gap: 24px;">
+                <div th:each="magaza : ${magazalar}" class="card" style="padding: 24px;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 16px;">
+                        <div style="width: 60px; height: 60px; background: var(--gradient-primary); border-radius: 12px; display: flex; align-items: center; justify-content: center; color: white; font-weight: 700; font-size: 1.5rem;"
+                            th:text="${#strings.substring(magaza.ad, 0, 1)}">M</div>
+                        <div>
+                            <h3 th:text="${magaza.ad}" style="margin: 0;">Mağaza</h3>
+                            <span style="color: var(--gray-500); font-size: 0.9rem;">
+                                <i class="fas fa-envelope"></i>
+                                <span
+                                    th:if="${okunmamisSayisi.get(magaza.id) != null and okunmamisSayisi.get(magaza.id) > 0}"
+                                    class="badge badge-warning"
+                                    th:text="${okunmamisSayisi.get(magaza.id)} + ' yeni'">0</span>
+                                <span
+                                    th:if="${okunmamisSayisi.get(magaza.id) == null or okunmamisSayisi.get(magaza.id) == 0}"
+                                    style="color: var(--gray-400);">Yeni mesaj yok</span>
+                            </span>
+                        </div>
+                    </div>
+                    <a th:href="@{/sahip/mesajlar/{id}(id=${magaza.id})}" class="btn btn-primary" style="width: 100%;">
+                        <i class="fas fa-comments"></i> Mesajları Gör
+                    </a>
+                </div>
+            </div>
+
+            <!-- EMPTY STATE -->
+            <div th:if="${magazalar == null or magazalar.empty}" class="empty-state" style="padding: 60px;">
+                <i class="fas fa-store" style="font-size: 3rem; color: var(--gray-300); margin-bottom: 20px;"></i>
+                <h3>Henüz mağazanız yok</h3>
+                <a th:href="@{/sahip/magaza-olustur}" class="btn btn-primary" style="margin-top: 20px;">
+                    <i class="fas fa-plus"></i> Mağaza Oluştur
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

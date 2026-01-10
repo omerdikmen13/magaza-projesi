@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sohbet Detayı - Admin</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 140px);
+            min-height: 500px;
+            background: #fff;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            border: 1px solid var(--gray-200);
+        }
+
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--gray-200);
+            background: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 10;
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background-image: url("https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png");
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            position: relative;
+            line-height: 1.4;
+            font-size: 0.95rem;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-store {
+            align-self: flex-end;
+            background: #dcf8c6;
+            color: var(--dark);
+            border-top-right-radius: 0;
+        }
+
+        .message-customer {
+            align-self: flex-start;
+            background: white;
+            color: var(--dark);
+            border-top-left-radius: 0;
+        }
+
+        .message-meta {
+            font-size: 0.7rem;
+            margin-top: 4px;
+            color: var(--gray-500);
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .chat-footer {
+            padding: 10px 15px;
+            background: #f0f2f5;
+            border-top: 1px solid #d1d7db;
+        }
+
+        .reply-box {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .message-input {
+            flex: 1;
+            border-radius: 24px;
+            padding: 12px 20px;
+            border: none;
+            outline: none;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: none;
+            height: 48px;
+            line-height: 24px;
+            scrollbar-width: none;
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            color: white;
+            font-size: 1.1rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-customer {
+            background: #6c757d;
+        }
+
+        .btn-store {
+            background: var(--primary-color);
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .send-tooltip {
+            position: absolute;
+            bottom: 60px;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+        }
+
+        .btn-wrapper {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-wrapper:hover .send-tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container" style="padding-top: 20px; height: 100vh; display: flex; flex-direction: column;">
+
+        <!-- Header -->
+        <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <a th:href="@{/admin/mesajlar}" class="back-link" style="margin: 0;">
+                <i class="fas fa-arrow-left"></i> Sohbetler
+            </a>
+            <div style="font-size: 0.9rem; color: var(--gray-500);">
+                <i class="fas fa-shield-alt"></i> Admin Sohbet Modu
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <!-- Header -->
+            <div class="chat-header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div
+                            style="width: 40px; height: 40px; background: #dfe3e5; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gray-600);">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight: 600; color: var(--dark);"
+                                th:text="${musteri.ad + ' ' + musteri.soyad}">Müşteri</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);">Müşteri</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="color: var(--gray-400); font-size: 0.9rem;">
+                    <i class="fas fa-arrows-alt-h"></i>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="display: flex; align-items: center; gap: 10px; text-align: right;">
+                        <div>
+                            <div style="font-weight: 600; color: var(--dark);" th:text="${magaza.ad}">Mağaza</div>
+                            <div style="font-size: 0.75rem; color: var(--gray-500);"
+                                th:text="${magaza.sahip.kullaniciAdi}">Sahip</div>
+                        </div>
+                        <div
+                            style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white;">
+                            <i class="fas fa-store"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="chat-messages" id="chatMessages">
+
+                <div th:each="m : ${sohbetGecmisi}"
+                    th:class="${'message ' + (m.gonderenMusteri ? 'message-customer' : 'message-store')}">
+
+                    <div style="font-size: 0.75rem; font-weight: 700; color: inherit; margin-bottom: 2px;"
+                        th:style="${m.gonderenMusteri ? 'color: #e57373;' : 'color: #2e7d32;'}"
+                        th:text="${m.gonderen.kullaniciAdi} + (m.gonderenMusteri ? ' (Müşteri)' : ' (Mağaza)')">Gönderen
+                    </div>
+
+                    <div th:text="${m.icerik}">Mesaj</div>
+
+                    <div class="message-meta">
+                        <span th:text="${#temporals.format(m.tarih, 'HH:mm')}">12:00</span>
+                        <span th:if="${m.okundu}" style="color: #53bdeb;"><i class="fas fa-check-double"></i></span>
+                        <span th:unless="${m.okundu}"><i class="fas fa-check"></i></span>
+                    </div>
+                </div>
+
+                <div th:if="${sohbetGecmisi.empty}"
+                    style="text-align: center; color: var(--gray-600); margin-top: 50px; background: rgba(255,255,255,0.6); padding: 10px; border-radius: 20px; align-self: center;">
+                    Henüz mesaj yok. İlk mesajı siz yazın!
+                </div>
+
+            </div>
+
+            <!-- Footer (Reply) -->
+            <div class="chat-footer">
+                <form th:action="@{/admin/sohbet/gonder}" method="post" class="reply-box">
+                    <input type="hidden" name="magazaId" th:value="${magaza.id}">
+                    <input type="hidden" name="musteriId" th:value="${musteri.id}">
+
+                    <input type="text" name="icerik" class="message-input" placeholder="Bir mesaj yazın..."
+                        autocomplete="off" required>
+
+                    <div class="btn-wrapper">
+                        <!-- Direct Send - No Alert -->
+                        <button type="submit" name="gonderenTipi" value="MUSTERI" class="send-btn btn-customer"
+                            title="Müşteri Olarak Gönder">
+                            <i class="fas fa-user"></i>
+                        </button>
+                        <div class="send-tooltip">Müşteri Olarak Gönder</div>
+                    </div>
+
+                    <div class="btn-wrapper">
+                        <!-- Direct Send - No Alert -->
+                        <button type="submit" name="gonderenTipi" value="MAGAZA" class="send-btn btn-store"
+                            title="Mağaza Olarak Gönder">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                        <div class="send-tooltip">Mağaza Olarak Gönder</div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        window.onload = function () {
+            var chat = document.getElementById("chatMessages");
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+
+</html>

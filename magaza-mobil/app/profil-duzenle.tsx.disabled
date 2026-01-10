@@ -1,0 +1,170 @@
+import React, { useState, useEffect } from 'react';
+import {
+    View,
+    Text,
+    ScrollView,
+    TextInput,
+    TouchableOpacity,
+    Alert,
+    ActivityIndicator,
+    StatusBar,
+    KeyboardAvoidingView,
+    Platform,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { router } from 'expo-router';
+import { useMutation } from '@tanstack/react-query';
+import { ArrowLeft, User, Mail, Phone, MapPin, Save } from 'lucide-react-native';
+import { MotiView } from 'moti';
+
+import { authApi } from '../services/api';
+import { useAuthStore } from '../stores/authStore';
+
+export default function ProfilDuzenleScreen() {
+    const { user, updateUser, isAuthenticated } = useAuthStore();
+
+    const [formData, setFormData] = useState({
+        ad: user?.ad || '',
+        soyad: user?.soyad || '',
+        email: user?.email || '',
+        telefon: user?.telefon || '',
+        adres: user?.adres || '',
+    });
+
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.replace('/(auth)/login');
+        }
+    }, [isAuthenticated]);
+
+    const updateMutation = useMutation({
+        mutationFn: () => authApi.profilGuncelle(formData),
+        onSuccess: (data) => {
+            // Auth store'daki kullanıcı bilgilerini güncelle
+            if (data.kullanici) {
+                updateUser(data.kullanici);
+            }
+            Alert.alert('Başarılı', 'Profil bilgileriniz güncellendi!');
+            router.back();
+        },
+        onError: (error: any) => {
+            Alert.alert('Hata', error.response?.data?.error || 'Profil güncellenemedi');
+        },
+    });
+
+    const handleSave = () => {
+        if (!formData.ad.trim() || !formData.soyad.trim()) {
+            Alert.alert('Uyarı', 'Ad ve soyad alanları zorunludur');
+            return;
+        }
+        updateMutation.mutate();
+    };
+
+    const fields = [
+        { key: 'ad', label: 'Ad', icon: User, placeholder: 'Adınız' },
+        { key: 'soyad', label: 'Soyad', icon: User, placeholder: 'Soyadınız' },
+        { key: 'email', label: 'E-posta', icon: Mail, placeholder: 'E-posta adresiniz', keyboardType: 'email-address' as const },
+        { key: 'telefon', label: 'Telefon', icon: Phone, placeholder: '05xx xxx xx xx', keyboardType: 'phone-pad' as const },
+        { key: 'adres', label: 'Adres', icon: MapPin, placeholder: 'Adresiniz', multiline: true },
+    ];
+
+    return (
+        <View className="flex-1 bg-gray-100">
+            <StatusBar barStyle="light-content" />
+
+            {/* Header */}
+            <LinearGradient
+                colors={['#667eea', '#764ba2']}
+                className="pt-12 pb-6 px-5"
+            >
+                <View className="flex-row items-center">
+                    <TouchableOpacity
+                        onPress={() => router.back()}
+                        className="w-10 h-10 rounded-full bg-white/20 items-center justify-center mr-4"
+                    >
+                        <ArrowLeft size={22} color="white" />
+                    </TouchableOpacity>
+                    <Text className="text-white text-xl font-bold">Profil Düzenle</Text>
+                </View>
+            </LinearGradient>
+
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                className="flex-1"
+            >
+                <ScrollView
+                    contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+                    showsVerticalScrollIndicator={false}
+                >
+                    {/* User Avatar */}
+                    <MotiView
+                        from={{ opacity: 0, scale: 0.8 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="items-center mb-8"
+                    >
+                        <View className="w-24 h-24 rounded-full bg-gradient-to-br from-primary-500 to-purple-600 items-center justify-center">
+                            <LinearGradient
+                                colors={['#667eea', '#764ba2']}
+                                className="w-24 h-24 rounded-full items-center justify-center"
+                            >
+                                <Text className="text-white text-3xl font-bold">
+                                    {formData.ad.charAt(0).toUpperCase()}{formData.soyad.charAt(0).toUpperCase()}
+                                </Text>
+                            </LinearGradient>
+                        </View>
+                        <Text className="text-gray-600 mt-3">@{user?.kullaniciAdi}</Text>
+                    </MotiView>
+
+                    {/* Form Fields */}
+                    {fields.map((field, index) => (
+                        <MotiView
+                            key={field.key}
+                            from={{ opacity: 0, translateY: 20 }}
+                            animate={{ opacity: 1, translateY: 0 }}
+                            transition={{ delay: index * 50 }}
+                            className="mb-4"
+                        >
+                            <Text className="text-gray-700 font-semibold mb-2 ml-1">{field.label}</Text>
+                            <View className="bg-white rounded-xl flex-row items-center px-4 shadow-sm" style={{ elevation: 2 }}>
+                                <field.icon size={20} color="#9ca3af" />
+                                <TextInput
+                                    className="flex-1 py-4 px-3 text-gray-800"
+                                    placeholder={field.placeholder}
+                                    placeholderTextColor="#9ca3af"
+                                    value={formData[field.key as keyof typeof formData]}
+                                    onChangeText={(text) => setFormData({ ...formData, [field.key]: text })}
+                                    keyboardType={field.keyboardType || 'default'}
+                                    multiline={field.multiline}
+                                    numberOfLines={field.multiline ? 3 : 1}
+                                    style={field.multiline ? { textAlignVertical: 'top', minHeight: 80 } : {}}
+                                />
+                            </View>
+                        </MotiView>
+                    ))}
+                </ScrollView>
+            </KeyboardAvoidingView>
+
+            {/* Save Button */}
+            <View className="absolute bottom-0 left-0 right-0 p-5 bg-white border-t border-gray-200">
+                <TouchableOpacity
+                    onPress={handleSave}
+                    disabled={updateMutation.isPending}
+                >
+                    <LinearGradient
+                        colors={['#667eea', '#764ba2']}
+                        className="flex-row items-center justify-center py-4 rounded-xl"
+                    >
+                        {updateMutation.isPending ? (
+                            <ActivityIndicator color="white" />
+                        ) : (
+                            <>
+                                <Save size={20} color="white" />
+                                <Text className="text-white font-bold ml-2 text-lg">Kaydet</Text>
+                            </>
+                        )}
+                    </LinearGradient>
+                </TouchableOpacity>
+            </View>
+        </View>
+    );
+}

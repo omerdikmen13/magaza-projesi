@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeni Mağaza Oluştur - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+
+    <!-- NAVBAR -->
+    <nav class="navbar">
+        <div class="navbar-brand">
+            <a th:href="@{/}" style="display: flex; align-items: center; gap: 12px;">
+                <i class="fas fa-store"></i> Mağaza Sistemi
+            </a>
+        </div>
+        <div class="navbar-nav">
+            <a th:href="@{/sahip}" class="nav-link"
+                style="background: rgba(102, 126, 234, 0.1); color: var(--primary-color);">
+                <i class="fas fa-cog"></i> Satıcı Paneli
+            </a>
+
+            <div class="user-section">
+                <a th:href="@{/hesabim}" class="user-name">
+                    <i class="fas fa-user-circle"></i> <span sec:authentication="name"></span>
+                </a>
+                <a th:href="@{/logout}" class="btn-nav btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page">
+
+            <!-- BACK LINK -->
+            <a th:href="@{/sahip}" class="back-link">
+                <i class="fas fa-arrow-left"></i> Panele Dön
+            </a>
+
+            <!-- PAGE HEADER -->
+            <div class="page-header" style="margin: 30px 0 40px;">
+                <h1><i class="fas fa-plus-circle"></i> Yeni Mağaza Oluştur</h1>
+                <p>Mağazanızın bilgilerini girin ve satışa başlayın</p>
+            </div>
+
+            <!-- CREATE STORE FORM -->
+            <div class="card" style="max-width: 700px; margin: 0 auto; padding: 40px;">
+                <form th:action="@{/sahip/magaza-olustur}" method="post">
+
+                    <div class="form-group">
+                        <label class="form-label" for="ad">
+                            <i class="fas fa-store"></i> Mağaza Adı *
+                        </label>
+                        <input type="text" id="ad" name="ad" class="form-control" required
+                            placeholder="Örn: Moda Butik, Trend Giyim...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="aciklama">
+                            <i class="fas fa-align-left"></i> Mağaza Açıklaması *
+                        </label>
+                        <textarea id="aciklama" name="aciklama" class="form-control" rows="4" required
+                            placeholder="Mağazanızı tanıtın. Hangi ürünleri satıyorsunuz? Neden müşteriler sizi tercih etmeli?"></textarea>
+                    </div>
+
+                    <div class="alert"
+                        style="background: linear-gradient(135deg, #667eea10 0%, #764ba210 100%); border: none; margin-bottom: 30px;">
+                        <i class="fas fa-info-circle" style="color: var(--primary-color);"></i>
+                        <span style="color: var(--gray-700);">Mağaza oluşturduktan sonra ürün eklemeye
+                            başlayabilirsiniz.</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary"
+                        style="width: 100%; padding: 16px; font-size: 1.1rem;">
+                        <i class="fas fa-rocket"></i> Mağazayı Oluştur
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
