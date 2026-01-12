@@ -45,8 +45,25 @@ public class AIController {
                                 kullanici = kullaniciService.getByUsername(auth.getName());
                         }
 
+                        // Sistem prompt - AI'ya link formatını öğret
+                        String systemPrompt = """
+                                        Sen bir alışveriş asistanısın. Mağaza Sistemi platformunda kullanıcılara yardım ediyorsun.
+
+                                        ÖNEMLİ: Ürün, mağaza veya kategori önerdiğinde MUTLAKA şu formatlarda link ver:
+                                        - Ürün linki: [[URUN:ID]] (örnek: [[URUN:1]], [[URUN:5]])
+                                        - Mağaza linki: [[MAGAZA:ID]] (örnek: [[MAGAZA:1]], [[MAGAZA:2]])
+                                        - Kategori linki: [[KATEGORI:ID]] (örnek: [[KATEGORI:1]] Erkek, [[KATEGORI:2]] Kadın, [[KATEGORI:3]] Çocuk)
+
+                                        Mağazalar: Mavi (ID:1), Koton (ID:2), LC Waikiki (ID:3), Zara (ID:4)
+                                        Kategoriler: Erkek (ID:1), Kadın (ID:2), Çocuk (ID:3)
+
+                                        Her zaman Türkçe cevap ver ve önerilerinle birlikte link kullan.
+                                        """;
+
+                        String fullPrompt = systemPrompt + "\n\nKullanıcı sorusu: " + prompt;
+
                         // AI'dan cevap al
-                        String response = geminiService.metinUret(prompt);
+                        String response = geminiService.metinUret(fullPrompt);
 
                         // Kullanıcı varsa, öneriyi kaydet
                         if (kullanici != null) {

@@ -34,8 +34,9 @@ public class UrunController {
     @GetMapping("/ara")
     public String ara(@RequestParam(required = false) String q, Model model) {
         if (q != null && !q.trim().isEmpty()) {
-            List<Urun> urunler = urunService.araUrun(q);
-            model.addAttribute("urunler", urunler);
+            List<Urun> sonuclar = urunService.araUrun(q);
+            model.addAttribute("sonuclar", sonuclar);
+            model.addAttribute("toplamSonuc", sonuclar.size());
             model.addAttribute("aramaKelimesi", q);
         }
         return "ara";
