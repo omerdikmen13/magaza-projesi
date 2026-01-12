@@ -1,7 +1,9 @@
 package com.magazaapp.controller;
 
 import com.magazaapp.model.*;
-import com.magazaapp.repository.*;
+import com.magazaapp.service.MesajService;
+import com.magazaapp.service.KullaniciService;
+import com.magazaapp.service.MagazaService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -12,31 +14,24 @@ import java.util.*;
 @Controller
 public class MesajController {
 
-    private final MesajRepository mesajRepository;
-    private final KullaniciRepository kullaniciRepository;
-    private final MagazaRepository magazaRepository;
+    private final MesajService mesajService;
+    private final KullaniciService kullaniciService;
+    private final MagazaService magazaService;
 
-    public MesajController(MesajRepository mesajRepository, KullaniciRepository kullaniciRepository,
-            MagazaRepository magazaRepository) {
-        this.mesajRepository = mesajRepository;
-        this.kullaniciRepository = kullaniciRepository;
-        this.magazaRepository = magazaRepository;
+    public MesajController(MesajService mesajService, KullaniciService kullaniciService,
+            MagazaService magazaService) {
+        this.mesajService = mesajService;
+        this.kullaniciService = kullaniciService;
+        this.magazaService = magazaService;
     }
 
     // ============ MÜŞTERİ: MESAJLARIM ============
     @GetMapping("/mesajlarim")
     public String mesajlarim(Authentication auth, Model model) {
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
 
-        // Bu müşterinin sohbetlerini bul
-        List<Mesaj> mesajlar = mesajRepository.findByMusteriIdOrderByTarihDesc(kullanici.getId());
-
-        // Mağaza bazlı grupla (son mesaj)
-        Map<Long, Mesaj> magazaSonMesaj = new LinkedHashMap<>();
-        for (Mesaj m : mesajlar) {
-            magazaSonMesaj.putIfAbsent(m.getMagaza().getId(), m);
-        }
+        // Son mesajları mağaza bazında grupla
+        Map<Long, Mesaj> magazaSonMesaj = mesajService.getMusteriMagazaSonMesajlari(kullanici.getId());
 
         model.addAttribute("kullanici", kullanici);
         model.addAttribute("sohbetler", magazaSonMesaj.values());
@@ -47,22 +42,11 @@ public class MesajController {
     // ============ MÜŞTERİ: SOHBET SAYFASI ============
     @GetMapping("/sohbet/{magazaId}")
     public String sohbet(@PathVariable Long magazaId, Authentication auth, Model model) {
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
+        Magaza magaza = magazaService.getMagazaById(magazaId);
 
-        Magaza magaza = magazaRepository.findById(magazaId)
-                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-        // Bu müşterinin bu mağaza ile mesajları
-        List<Mesaj> mesajlar = mesajRepository.findByMagazaIdAndMusteriIdOrderByTarihAsc(magazaId, kullanici.getId());
-
-        // Okunmamış mesajları okundu yap (mağaza sahibinden gelen)
-        for (Mesaj m : mesajlar) {
-            if (!m.getGonderenMusteri() && !m.getOkundu()) {
-                m.setOkundu(true);
-                mesajRepository.save(m);
-            }
-        }
+        // Mesajları getir ve okundu işaretle
+        List<Mesaj> mesajlar = mesajService.getMagazaMusteriSohbet(magazaId, kullanici.getId(), true);
 
         model.addAttribute("kullanici", kullanici);
         model.addAttribute("magaza", magaza);
@@ -78,32 +62,20 @@ public class MesajController {
             @RequestParam(required = false) Long musteriId,
             Authentication auth) {
 
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
+        Magaza magaza = magazaService.getMagazaById(magazaId);
 
-        Magaza magaza = magazaRepository.findById(magazaId)
-                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-        // Mağaza sahibi mi müşteri mi?
+        // Mağaza sahibi mi müşteri mi kontrol et ve mesajı gönder
         boolean gonderenMusteri = !magaza.getSahip().getId().equals(kullanici.getId());
 
-        Mesaj mesaj = new Mesaj();
-        mesaj.setGonderen(kullanici);
-        mesaj.setMagaza(magaza);
-        mesaj.setIcerik(icerik);
-        mesaj.setGonderenMusteri(gonderenMusteri);
-
         if (gonderenMusteri) {
-            // Müşteri gönderiyor - müşteri kendisi
-            mesaj.setMusteri(kullanici);
-            mesajRepository.save(mesaj);
+            // Müşteri gönderiyor
+            mesajService.musteridenMesajGonder(kullanici.getId(), magazaId, icerik);
             return "redirect:/sohbet/" + magazaId;
         } else {
-            // Mağaza sahibi gönderiyor - müşteriyi bul
+            // Mağaza sahibi gönderiyor
             if (musteriId != null) {
-                Kullanici musteri = kullaniciRepository.findById(musteriId).orElse(null);
-                mesaj.setMusteri(musteri);
-                mesajRepository.save(mesaj);
+                mesajService.magazadanMesajGonder(kullanici.getId(), magazaId, musteriId, icerik);
                 return "redirect:/sahip/mesajlar/" + magazaId + "?musteriId=" + musteriId;
             }
             return "redirect:/sahip/mesajlar/" + magazaId;
@@ -113,22 +85,14 @@ public class MesajController {
     // ============ MAĞAZA SAHİBİ: MESAJLAR ============
     @GetMapping("/sahip/mesajlar")
     public String sahipMesajlar(Authentication auth, Model model) {
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
 
-        // Sahibin mağazaları
-        List<Magaza> magazalar = magazaRepository.findBySahipId(kullanici.getId());
-
-        // Her mağaza için mesaj sayısı
-        Map<Long, Long> okunmamisSayisi = new HashMap<>();
-
-        for (Magaza m : magazalar) {
-            okunmamisSayisi.put(m.getId(), mesajRepository.countOkunmamisByMagazaId(m.getId()));
-        }
+        // Sahibin mağazaları ve mesaj istatistikleri
+        Map<Magaza, Long> magazaOkunmamisSayisi = mesajService.getSahipMagazaOkunmamisSayilari(kullanici.getId());
 
         model.addAttribute("kullanici", kullanici);
-        model.addAttribute("magazalar", magazalar);
-        model.addAttribute("okunmamisSayisi", okunmamisSayisi);
+        model.addAttribute("magazalar", magazaOkunmamisSayisi.keySet());
+        model.addAttribute("okunmamisSayisi", magazaOkunmamisSayisi);
 
         return "sahip/mesajlar";
     }
@@ -139,11 +103,8 @@ public class MesajController {
             @RequestParam(required = false) Long musteriId,
             Authentication auth, Model model) {
 
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-        Magaza magaza = magazaRepository.findById(magazaId)
-                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+        Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
+        Magaza magaza = magazaService.getMagazaById(magazaId);
 
         // Yetki kontrolü
         if (!magaza.getSahip().getId().equals(kullanici.getId())) {
@@ -151,25 +112,15 @@ public class MesajController {
         }
 
         // Bu mağazaya mesaj gönderen müşteriler
-        List<Kullanici> musteriler = mesajRepository.findDistinctMusterilerByMagazaId(magazaId);
+        List<Kullanici> musteriler = mesajService.getMagazaMusterileri(magazaId);
 
         // Seçili müşteri varsa sohbeti göster
         List<Mesaj> seciliSohbet = new ArrayList<>();
         Kullanici seciliMusteri = null;
 
         if (musteriId != null) {
-            seciliMusteri = kullaniciRepository.findById(musteriId).orElse(null);
-            if (seciliMusteri != null) {
-                seciliSohbet = mesajRepository.findByMagazaIdAndMusteriIdOrderByTarihAsc(magazaId, musteriId);
-
-                // Okunmamış mesajları okundu yap
-                for (Mesaj m : seciliSohbet) {
-                    if (m.getGonderenMusteri() && !m.getOkundu()) {
-                        m.setOkundu(true);
-                        mesajRepository.save(m);
-                    }
-                }
-            }
+            seciliMusteri = kullaniciService.getKullaniciById(musteriId);
+            seciliSohbet = mesajService.getMagazaMusteriSohbet(magazaId, musteriId, true);
         }
 
         model.addAttribute("kullanici", kullanici);

@@ -18,9 +18,14 @@ public class GlobalControllerAdvice {
 
     @ModelAttribute("kullanici")
     public Kullanici getCurrentUser() {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
-            return kullaniciRepository.findByKullaniciAdi(auth.getName()).orElse(null);
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+                return kullaniciRepository.findByKullaniciAdi(auth.getName()).orElse(null);
+            }
+        } catch (Exception e) {
+            // Kullanıcı bilgisi alınamazsa sessizce null dön
+            System.err.println("GlobalControllerAdvice - Kullanici alinamadi: " + e.getMessage());
         }
         return null;
     }

@@ -384,10 +384,10 @@
         messages.appendChild(loadingMsg);
         messages.scrollTop = messages.scrollHeight;
 
-        fetch('/api/ai/oneri', {
+        fetch('/api/ai/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ soru: text })
+            body: JSON.stringify({ prompt: text })
         })
             .then(function (response) { return response.json(); })
             .then(function (data) {

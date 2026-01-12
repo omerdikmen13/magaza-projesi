@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödeme Hatası - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .error-container {
+            max-width: 600px;
+            margin: 80px auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+        }
+
+        .error-icon i {
+            font-size: 3.5rem;
+            color: white;
+        }
+
+        .error-title {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .error-message {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-retry {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 15px 30px;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-retry:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-cart {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--gray-300);
+            padding: 15px 30px;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-cart:hover {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="error-container">
+
+            <div class="error-icon">
+                <i class="fas fa-times"></i>
+            </div>
+
+            <h1 class="error-title">Ödeme Başarısız</h1>
+
+            <p class="error-message" th:if="${hata}" th:text="${hata}">
+                Ödeme işlemi sırasında bir hata oluştu.
+            </p>
+            <p class="error-message" th:unless="${hata}">
+                Ödeme işleminiz tamamlanamadı. Lütfen tekrar deneyin veya farklı bir ödeme yöntemi kullanın.
+            </p>
+
+            <div class="error-actions">
+                <a th:href="@{/odeme}" class="btn-retry">
+                    <i class="fas fa-redo"></i> Tekrar Dene
+                </a>
+                <a th:href="@{/sepet}" class="btn-cart">
+                    <i class="fas fa-shopping-cart"></i> Sepete Dön
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

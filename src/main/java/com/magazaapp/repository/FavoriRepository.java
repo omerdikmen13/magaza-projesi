@@ -34,4 +34,12 @@ public interface FavoriRepository extends JpaRepository<Favori, Long> {
 
     // Bir ürünün kaç kişi tarafından favorilere eklendiği
     long countByUrun(Urun urun);
+
+    // ========== ID-BASED METHODS (Service Layer için) ==========
+
+    // Kullanıcı ID'sine göre favorileri getir
+    List<Favori> findByKullaniciId(Long kullaniciId);
+
+    // Kullanıcı ID ve Ürün ID'sine göre favori bul
+    Optional<Favori> findByKullaniciIdAndUrunId(Long kullaniciId, Long urunId);
 }

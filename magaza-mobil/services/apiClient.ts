@@ -6,7 +6,7 @@ import { useAuthStore } from '../stores/authStore';
 // Development: ngrok URL, Production: gerçek sunucu URL'si
 const BASE_URL = Constants.expoConfig?.extra?.apiUrl
     || process.env.EXPO_PUBLIC_API_URL
-    || 'http://localhost:8080';
+    || 'http://13.53.132.4:8080';
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,

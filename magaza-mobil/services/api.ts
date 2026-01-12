@@ -436,3 +436,60 @@ export const mesajlarApi = {
         return response.data;
     },
 };
+
+// =============== ÖDEME API (Mock) ===============
+export const odemeApi = {
+    /**
+     * Ödeme başlat - token ve tutar döner
+     */
+    basla: async (): Promise<{
+        success: boolean;
+        token?: string;
+        odemeId?: number;
+        tutar?: number;
+        error?: string;
+    }> => {
+        const response = await apiClient.post('/api/odeme/basla');
+        return response.data;
+    },
+
+    /**
+     * Ödeme tamamla - kart bilgileri ile
+     */
+    tamamla: async (
+        token: string,
+        kartNo: string,
+        sonKullanma: string,
+        cvv: string,
+        kartSahibi: string
+    ): Promise<{
+        success: boolean;
+        message: string;
+        siparisId?: number;
+        odemeId?: number;
+        error?: string;
+    }> => {
+        const response = await apiClient.post('/api/odeme/tamamla', {
+            token,
+            kartNo,
+            sonKullanma,
+            cvv,
+            kartSahibi
+        });
+        return response.data;
+    },
+
+    /**
+     * Ödeme durumunu sorgula
+     */
+    durum: async (token: string): Promise<{
+        success: boolean;
+        durum: 'BEKLEMEDE' | 'BASARILI' | 'BASARISIZ' | 'IPTAL' | 'IADE';
+        odemeId?: number;
+        siparisId?: number;
+        error?: string;
+    }> => {
+        const response = await apiClient.get(`/api/odeme/durum/${token}`);
+        return response.data;
+    },
+};

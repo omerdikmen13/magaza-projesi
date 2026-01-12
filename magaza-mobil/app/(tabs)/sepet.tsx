@@ -7,6 +7,7 @@ import {
     Image,
     Alert,
     StatusBar,
+    ActivityIndicator,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { router } from 'expo-router';
@@ -19,10 +20,11 @@ import {
     CreditCard,
     Package,
     ArrowRight,
+    Wallet,
 } from 'lucide-react-native';
 import { MotiView } from 'moti';
 
-import { sepetApi } from '../../services/api';
+import { sepetApi, odemeApi } from '../../services/api';
 import { useAuthStore } from '../../stores/authStore';
 
 export default function SepetScreen() {
@@ -59,11 +61,38 @@ export default function SepetScreen() {
         }
     });
 
-    const handleCheckout = () => {
-        // Alert.prompt sadece iOS'ta çalışır, Android için basit onay
+    // Mock ödeme mutation
+    const paymentMutation = useMutation({
+        mutationFn: () => odemeApi.basla(),
+        onSuccess: (data) => {
+            if (data.success && data.token) {
+                // Ödeme ekranına yönlendir
+                router.push({
+                    pathname: '/odeme-webview' as any,
+                    params: {
+                        token: data.token,
+                        tutar: data.tutar?.toString() || '0'
+                    }
+                });
+            } else {
+                Alert.alert('Hata', data.error || 'Ödeme başlatılamadı');
+            }
+        },
+        onError: (error: any) => {
+            Alert.alert('Hata', error.response?.data?.error || 'Ödeme başlatılamadı');
+        }
+    });
+
+    // iyzico ile ödeme
+    const handlePayment = () => {
+        paymentMutation.mutate();
+    };
+
+    // Kapıda ödeme
+    const handleCOD = () => {
         Alert.alert(
-            'Sipariş Ver',
-            'Siparişinizi onaylıyor musunuz?',
+            'Kapıda Ödeme',
+            'Siparişinizi kapıda ödeme ile onaylıyor musunuz?',
             [
                 { text: 'İptal', style: 'cancel' },
                 {
@@ -189,20 +218,44 @@ export default function SepetScreen() {
                         ))}
                     </ScrollView>
 
-                    {/* Footer - Toplam ve Sipariş Ver */}
+                    {/* Footer - Toplam ve Ödeme Seçenekleri */}
                     <View className="bg-white px-5 py-4 border-t border-gray-200">
                         <View className="flex-row justify-between items-center mb-4">
                             <Text className="text-gray-500 text-lg">Toplam:</Text>
                             <Text className="text-gray-900 text-2xl font-extrabold">{toplamTutar.toFixed(2)} ₺</Text>
                         </View>
-                        <TouchableOpacity onPress={handleCheckout}>
+
+                        {/* iyzico ile Ödeme */}
+                        <TouchableOpacity onPress={handlePayment} disabled={paymentMutation.isPending}>
                             <LinearGradient
                                 colors={['#667eea', '#764ba2']}
-                                className="py-4 rounded-2xl flex-row items-center justify-center"
+                                className="py-4 rounded-2xl flex-row items-center justify-center mb-3"
                             >
-                                <CreditCard size={20} color="white" />
-                                <Text className="text-white font-bold text-lg ml-2">Sipariş Ver</Text>
+                                {paymentMutation.isPending ? (
+                                    <ActivityIndicator color="white" />
+                                ) : (
+                                    <>
+                                        <CreditCard size={20} color="white" />
+                                        <Text className="text-white font-bold text-lg ml-2">Ödeme Yap</Text>
+                                    </>
+                                )}
                             </LinearGradient>
+                        </TouchableOpacity>
+
+                        {/* Kapıda Ödeme */}
+                        <TouchableOpacity
+                            onPress={handleCOD}
+                            className="bg-gray-100 py-3 rounded-xl flex-row items-center justify-center"
+                            disabled={checkoutMutation.isPending}
+                        >
+                            {checkoutMutation.isPending ? (
+                                <ActivityIndicator color="#666" />
+                            ) : (
+                                <>
+                                    <Wallet size={18} color="#666" />
+                                    <Text className="text-gray-600 font-medium ml-2">Kapıda Ödeme</Text>
+                                </>
+                            )}
                         </TouchableOpacity>
                     </View>
                 </>

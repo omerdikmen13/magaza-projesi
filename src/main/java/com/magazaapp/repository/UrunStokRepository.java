@@ -10,7 +10,8 @@ import java.util.Optional;
 @Repository
 public interface UrunStokRepository extends JpaRepository<UrunStok, Long> {
 
-    List<UrunStok> findByUrunId(Long urunId);
+    @org.springframework.data.jpa.repository.Query("SELECT s FROM UrunStok s LEFT JOIN FETCH s.beden WHERE s.urun.id = :urunId")
+    List<UrunStok> findByUrunId(@org.springframework.data.repository.query.Param("urunId") Long urunId);
 
     Optional<UrunStok> findByUrunIdAndBedenId(Long urunId, Long bedenId);
 

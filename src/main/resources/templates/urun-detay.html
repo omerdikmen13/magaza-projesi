@@ -331,8 +331,8 @@
                         <a th:href="@{/sepet}" class="btn btn-secondary">
                             <i class="fas fa-shopping-cart"></i> Sepete Git
                         </a>
-                        <form th:action="@{/urun/{id}/sepete-ekle(id=${urun.id})}" method="post"
-                            style="display: inline;">
+                        <form th:action="@{/sepete-ekle}" method="post" style="display: inline;">
+                            <input type="hidden" name="urunId" th:value="${urun.id}">
                             <input type="hidden" name="bedenId" th:value="${bekleyenBedenId}">
                             <input type="hidden" name="adet" th:value="${bekleyenAdet}">
                             <input type="hidden" name="farkliMagazaOnay" value="true">
@@ -396,7 +396,7 @@
 
                         <!-- FAVORİ BUTONU (Sadece giriş yapmış müşteriler için) -->
                         <form sec:authorize="isAuthenticated()"
-                            th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}"
+                            th:if="${kullanici != null and kullanici.rol != null and kullanici.rol.name() == 'MUSTERI'}"
                             th:action="@{/favori/toggle/{id}(id=${urun.id})}" method="post" style="margin: 0;">
                             <button type="submit" class="favorite-btn" th:classappend="${isFavorite ? 'favorited' : ''}"
                                 style="width: 56px; height: 56px; border-radius: 50%; border: 2px solid #f43f5e; 
@@ -408,24 +408,35 @@
                         </form>
                     </div>
 
-                    <!-- ADD TO CART SECTION (Only for Customers) -->
-                    <form sec:authorize="isAuthenticated()"
-                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}"
-                        th:action="@{/urun/{id}/sepete-ekle(id=${urun.id})}" method="post" class="add-to-cart-section">
+                    <!-- ADD TO CART SECTION -->
+                    <form th:action="@{/sepete-ekle}" method="post" class="add-to-cart-section">
+
+                        <input type="hidden" name="urunId" th:value="${urun.id}">
 
                         <div class="size-selector">
                             <div class="size-title">
                                 <i class="fas fa-ruler"></i> Beden Seçin
                             </div>
                             <div class="size-options">
-                                <div th:each="stok : ${stoklar}" class="size-option">
-                                    <input type="radio" th:id="${'beden-' + stok.beden.id}" name="bedenId"
-                                        th:value="${stok.beden.id}" th:disabled="${stok.adet == 0}" required>
-                                    <label th:for="${'beden-' + stok.beden.id}">
-                                        <span class="size-name" th:text="${stok.beden.ad}">M</span>
-                                        <span class="size-stock"
-                                            th:text="${stok.adet == 0 ? 'Tükendi' : stok.adet + ' adet'}">10 adet</span>
-                                    </label>
+                                <th:block th:if="${stoklar != null and !#lists.isEmpty(stoklar)}">
+                                    <div th:each="stok : ${stoklar}" class="size-option" th:if="${stok.beden != null}">
+                                        <input type="radio" th:id="${'beden-' + stok.beden.id}" name="bedenId"
+                                            th:value="${stok.beden.id}" th:disabled="${stok.adet == 0}" required>
+                                        <label th:for="${'beden-' + stok.beden.id}">
+                                            <span class="size-name" th:text="${stok.beden.ad}">M</span>
+                                            <span class="size-stock"
+                                                th:text="${stok.adet == 0 ? 'Tükendi' : stok.adet + ' adet'}">10
+                                                adet</span>
+                                        </label>
+                                    </div>
+                                </th:block>
+
+                                <!-- Stok yoksa mesaj göster -->
+                                <div th:if="${#lists.isEmpty(stoklar)}"
+                                    style="color: var(--gray-500); padding: 20px; text-align: center;">
+                                    <i class="fas fa-box-open"
+                                        style="font-size: 2rem; margin-bottom: 10px; display: block;"></i>
+                                    Bu ürün için stok bilgisi bulunamadı.
                                 </div>
                             </div>
                         </div>
@@ -443,64 +454,6 @@
                         </button>
                     </form>
 
-                    <!-- STORE OWNER VIEW (Own Product) -->
-                    <div sec:authorize="isAuthenticated()"
-                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI and urun.magaza.sahip.id == kullanici.id}"
-                        class="add-to-cart-section" style="text-align: center; border-color: var(--warning);">
-                        <i class="fas fa-user-tie"
-                            style="font-size: 3rem; color: var(--warning); margin-bottom: 15px;"></i>
-                        <h3 style="margin-bottom: 10px;">Ürün Yönetimi</h3>
-                        <p style="margin-bottom: 20px;">Bu ürün sizin mağazanıza aittir.</p>
-
-                        <a th:href="@{/sahip/magaza/{magazaId}/urun-duzenle/{urunId}(magazaId=${urun.magaza.id}, urunId=${urun.id})}"
-                            class="btn btn-warning"
-                            style="width: 100%; padding: 15px; background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); border: none; font-size: 1.1rem;">
-                            <i class="fas fa-edit"></i> Ürünü Düzenle
-                        </a>
-                    </div>
-
-                    <!-- STORE OWNER VIEW (Other Product) -->
-                    <div sec:authorize="isAuthenticated()"
-                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI and urun.magaza.sahip.id != kullanici.id}"
-                        class="add-to-cart-section" style="text-align: center; background: #f8f9fa;">
-                        <i class="fas fa-store"
-                            style="font-size: 3rem; color: var(--gray-400); margin-bottom: 15px;"></i>
-                        <h3 style="margin-bottom: 10px; color: var(--gray-600);">İnceleme Modu</h3>
-                        <p>Mağaza sahibi hesabıyla diğer mağazaları görüntülüyorsunuz.</p>
-                    </div>
-
-                    <!-- ADMIN VIEW - Full Control -->
-                    <div sec:authorize="isAuthenticated()"
-                        th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).ADMIN}"
-                        class="add-to-cart-section" style="text-align: center; border-color: #e74c3c;">
-                        <i class="fas fa-shield-alt" style="font-size: 3rem; color: #e74c3c; margin-bottom: 15px;"></i>
-                        <h3 style="margin-bottom: 10px; color: #e74c3c;">Admin Kontrolü</h3>
-                        <p style="margin-bottom: 20px; color: var(--gray-600);">Bu ürünü düzenleyebilir veya
-                            silebilirsiniz.</p>
-
-                        <div style="display: flex; gap: 15px; justify-content: center;">
-                            <a th:href="@{/admin/urun/{id}/duzenle(id=${urun.id})}" class="btn btn-primary"
-                                style="padding: 15px 30px; font-size: 1.1rem;">
-                                <i class="fas fa-edit"></i> Ürünü Düzenle
-                            </a>
-                            <form th:action="@{/admin/urun/{id}/sil(id=${urun.id})}" method="post"
-                                style="display: inline;" onsubmit="return confirmDelete(event, this);">
-                                <button type="submit" class="btn btn-danger"
-                                    style="padding: 15px 30px; font-size: 1.1rem;">
-                                    <i class="fas fa-trash"></i> Pasife Al
-                                </button>
-                            </form>
-                        </div>
-                    </div>
-
-                    <!-- LOGIN PROMPT (Not Authenticated) -->
-                    <div sec:authorize="!isAuthenticated()" class="login-prompt">
-                        <i class="fas fa-lock"></i>
-                        <p>Sepete eklemek için lütfen giriş yapın</p>
-                        <a th:href="@{/giris}" class="btn btn-primary" style="padding: 14px 40px;">
-                            <i class="fas fa-sign-in-alt"></i> Giriş Yap
-                        </a>
-                    </div>
                 </div>
             </div>
         </div>

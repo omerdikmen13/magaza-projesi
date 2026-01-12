@@ -1,13 +1,12 @@
 package com.magazaapp.controller;
 
 import com.magazaapp.model.*;
-import com.magazaapp.repository.*;
+import com.magazaapp.service.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -16,95 +15,78 @@ import java.util.List;
 @RequestMapping("/sahip")
 public class MagazaSahibiController {
 
-        private final MagazaRepository magazaRepository;
-        private final KullaniciRepository kullaniciRepository;
-        private final UrunRepository urunRepository;
-        private final KategoriRepository kategoriRepository;
-        private final AltKategoriRepository altKategoriRepository;
-        private final BedenRepository bedenRepository;
-        private final UrunStokRepository urunStokRepository;
-        private final SiparisFisiRepository siparisFisiRepository;
-        private final SiparisDetayRepository siparisDetayRepository;
+        private final MagazaService magazaService;
+        private final KullaniciService kullaniciService;
+        private final UrunService urunService;
+        private final SiparisService siparisService;
+        private final KategoriService kategoriService;
+        private final BedenService bedenService;
 
-        public MagazaSahibiController(MagazaRepository magazaRepository, KullaniciRepository kullaniciRepository,
-                        UrunRepository urunRepository, KategoriRepository kategoriRepository,
-                        AltKategoriRepository altKategoriRepository, BedenRepository bedenRepository,
-                        UrunStokRepository urunStokRepository, SiparisFisiRepository siparisFisiRepository,
-                        SiparisDetayRepository siparisDetayRepository) {
-                this.magazaRepository = magazaRepository;
-                this.kullaniciRepository = kullaniciRepository;
-                this.urunRepository = urunRepository;
-                this.kategoriRepository = kategoriRepository;
-                this.altKategoriRepository = altKategoriRepository;
-                this.bedenRepository = bedenRepository;
-                this.urunStokRepository = urunStokRepository;
-                this.siparisFisiRepository = siparisFisiRepository;
-                this.siparisDetayRepository = siparisDetayRepository;
+        public MagazaSahibiController(MagazaService magazaService, KullaniciService kullaniciService,
+                        UrunService urunService, SiparisService siparisService,
+                        KategoriService kategoriService, BedenService bedenService) {
+                this.magazaService = magazaService;
+                this.kullaniciService = kullaniciService;
+                this.urunService = urunService;
+                this.siparisService = siparisService;
+                this.kategoriService = kategoriService;
+                this.bedenService = bedenService;
         }
 
         // ============ PANEL ANA SAYFA ============
         @GetMapping
         public String panel(Authentication auth, Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                List<Magaza> magazalar = magazaService.getMagazalarBySahip(sahip.getId());
 
-                // Kullanıcının mağazalarını bul
-                List<Magaza> magazalar = magazaRepository.findBySahipId(kullanici.getId());
-
-                model.addAttribute("kullanici", kullanici);
+                model.addAttribute("kullanici", sahip);
                 model.addAttribute("magazalar", magazalar);
 
                 return "sahip/panel";
         }
 
         // ============ YENİ MAĞAZA FORMU ============
-        @GetMapping("/magaza-olustur")
+        @GetMapping("/magaza/yeni")
         public String magazaOlusturForm(Model model) {
                 model.addAttribute("magaza", new Magaza());
                 return "sahip/magaza-olustur";
         }
 
         // ============ YENİ MAĞAZA KAYDET ============
-        @PostMapping("/magaza-olustur")
+        @PostMapping("/magaza/olustur")
         public String magazaOlustur(@RequestParam String ad,
                         @RequestParam String aciklama,
                         Authentication auth,
                         RedirectAttributes redirectAttributes) {
+                try {
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
 
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                        Magaza magaza = new Magaza();
+                        magaza.setAd(ad);
+                        magaza.setAciklama(aciklama);
+                        magaza.setSahip(sahip);
+                        magaza.setAktif(true);
 
-                // Kullanıcıyı mağaza sahibi yap
-                if (kullanici.getRol() == KullaniciRol.MUSTERI) {
-                        kullanici.setRol(KullaniciRol.MAGAZA_SAHIBI);
-                        kullaniciRepository.save(kullanici);
+                        magazaService.kaydet(magaza);
+                        redirectAttributes.addFlashAttribute("basari", "Mağaza başarıyla oluşturuldu!");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Mağaza oluşturulamadı: " + e.getMessage());
                 }
-
-                Magaza magaza = new Magaza();
-                magaza.setAd(ad);
-                magaza.setAciklama(aciklama);
-                magaza.setSahip(kullanici);
-                magaza.setAktif(true);
-                magazaRepository.save(magaza);
-
-                redirectAttributes.addFlashAttribute("basari", "Mağaza başarıyla oluşturuldu!");
                 return "redirect:/sahip";
         }
 
         // ============ MAĞAZA DÜZENLEME FORMU ============
         @GetMapping("/magaza/{id}/duzenle")
         public String magazaDuzenleForm(@PathVariable Long id, Authentication auth, Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                Magaza magaza = magazaService.getMagazaById(id);
 
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
+                // Yetki kontrolü
+                if (!magaza.getSahip().getId().equals(sahip.getId())) {
                         return "redirect:/sahip";
                 }
 
+                model.addAttribute("kullanici", sahip);
                 model.addAttribute("magaza", magaza);
                 return "sahip/magaza-duzenle";
         }
@@ -117,67 +99,63 @@ public class MagazaSahibiController {
                         @RequestParam(required = false) String logoUrl,
                         Authentication auth,
                         RedirectAttributes redirectAttributes) {
+                try {
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                        Magaza magaza = magazaService.getMagazaById(id);
 
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                        if (!magaza.getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu mağazayı düzenleme yetkiniz yok!");
+                                return "redirect:/sahip";
+                        }
 
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+                        magaza.setAd(ad);
+                        magaza.setAciklama(aciklama);
+                        if (logoUrl != null && !logoUrl.isEmpty()) {
+                                magaza.setLogoUrl(logoUrl);
+                        }
+                        magazaService.kaydet(magaza);
 
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
-                        return "redirect:/sahip";
+                        redirectAttributes.addFlashAttribute("basari", "Mağaza bilgileri güncellendi!");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Güncelleme hatası: " + e.getMessage());
                 }
-
-                magaza.setAd(ad);
-                magaza.setAciklama(aciklama);
-                magaza.setLogoUrl(logoUrl);
-                magazaRepository.save(magaza);
-
-                redirectAttributes.addFlashAttribute("basari", "Mağaza bilgileri güncellendi!");
                 return "redirect:/sahip";
         }
 
         // ============ MAĞAZA SİL (PASİFE AL) ============
         @PostMapping("/magaza/{id}/sil")
         public String magazaSil(@PathVariable Long id, Authentication auth, RedirectAttributes redirectAttributes) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                try {
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                        Magaza magaza = magazaService.getMagazaById(id);
 
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+                        if (!magaza.getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu mağazayı silme yetkiniz yok!");
+                                return "redirect:/sahip";
+                        }
 
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
-                        return "redirect:/sahip";
+                        magaza.setAktif(false);
+                        magazaService.kaydet(magaza);
+                        redirectAttributes.addFlashAttribute("basari", "Mağaza pasife alındı.");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Silme hatası: " + e.getMessage());
                 }
-
-                // Mağazayı tamamen silmek yerine pasife alıyoruz (veri kaybını önlemek için)
-                // Eğer silmek istersek related kayıtları da silmek gerekir (ürünler, siparişler
-                // vs)
-                // Ancak kullanıcı "sil" dediği için burada aktifliğini false yapıyoruz.
-                // İsteğe göre delete de atılabilir ama riskli.
-                magaza.setAktif(false);
-                magazaRepository.save(magaza);
-
-                redirectAttributes.addFlashAttribute("basari", "Mağaza silindi (pasife alındı)!");
                 return "redirect:/sahip";
         }
 
         // ============ MAĞAZA YÖNETİMİ ============
         @GetMapping("/magaza/{id}")
         public String magazaYonetim(@PathVariable Long id, Authentication auth, Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                Magaza magaza = magazaService.getMagazaById(id);
 
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
+                if (!magaza.getSahip().getId().equals(sahip.getId())) {
                         return "redirect:/sahip";
                 }
 
-                List<Urun> urunler = urunRepository.findByMagazaId(id);
+                List<Urun> urunler = magazaService.getMagazaninUrunleri(id);
 
+                model.addAttribute("kullanici", sahip);
                 model.addAttribute("magaza", magaza);
                 model.addAttribute("urunler", urunler);
 
@@ -185,33 +163,28 @@ public class MagazaSahibiController {
         }
 
         // ============ ÜRÜN EKLEME FORMU ============
-        @GetMapping("/magaza/{id}/urun-ekle")
+        @GetMapping("/magaza/{id}/urun/ekle")
         public String urunEkleForm(@PathVariable Long id, Authentication auth, Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                Magaza magaza = magazaService.getMagazaById(id);
 
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
+                if (!magaza.getSahip().getId().equals(sahip.getId())) {
                         return "redirect:/sahip";
                 }
 
-                List<Kategori> kategoriler = kategoriRepository.findAll();
-                List<AltKategori> altKategoriler = altKategoriRepository.findAll();
-                List<Beden> bedenler = bedenRepository.findAll();
+                List<Kategori> kategoriler = kategoriService.getTumKategoriler();
+                List<Beden> bedenler = bedenService.getTumBedenler();
 
+                model.addAttribute("kullanici", sahip);
                 model.addAttribute("magaza", magaza);
                 model.addAttribute("kategoriler", kategoriler);
-                model.addAttribute("altKategoriler", altKategoriler);
                 model.addAttribute("bedenler", bedenler);
 
                 return "sahip/urun-ekle";
         }
 
         // ============ ÜRÜN KAYDET ============
-        @PostMapping("/magaza/{id}/urun-ekle")
+        @PostMapping("/magaza/{id}/urun/ekle")
         public String urunEkle(@PathVariable Long id,
                         @RequestParam String ad,
                         @RequestParam String aciklama,
@@ -223,80 +196,66 @@ public class MagazaSahibiController {
                         @RequestParam List<Integer> stoklar,
                         Authentication auth,
                         RedirectAttributes redirectAttributes) {
+                try {
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                        Magaza magaza = magazaService.getMagazaById(id);
 
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
-                        return "redirect:/sahip";
-                }
-
-                AltKategori altKategori = altKategoriRepository.findById(altKategoriId)
-                                .orElseThrow(() -> new RuntimeException("Alt kategori bulunamadı"));
-
-                // Ürün oluştur
-                Urun urun = new Urun();
-                urun.setAd(ad);
-                urun.setAciklama(aciklama);
-                urun.setFiyat(fiyat);
-                urun.setRenk(renk);
-                urun.setResimUrl(resimUrl);
-                urun.setAltKategori(altKategori);
-                urun.setMagaza(magaza);
-                urun.setSezon(Sezon.TUM_SEZON);
-                urun.setAktif(true);
-                urun = urunRepository.save(urun);
-
-                // Stokları ekle
-                for (int i = 0; i < bedenIds.size(); i++) {
-                        if (stoklar.get(i) > 0) {
-                                Beden beden = bedenRepository.findById(bedenIds.get(i))
-                                                .orElseThrow(() -> new RuntimeException("Beden bulunamadı"));
-
-                                UrunStok stok = new UrunStok();
-                                stok.setUrun(urun);
-                                stok.setBeden(beden);
-                                stok.setAdet(stoklar.get(i));
-                                urunStokRepository.save(stok);
+                        if (!magaza.getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu mağazaya ürün ekleme yetkiniz yok!");
+                                return "redirect:/sahip";
                         }
-                }
 
-                redirectAttributes.addFlashAttribute("basari", "Ürün başarıyla eklendi!");
+                        // Ürün oluştur ve kaydet
+                        Urun urun = new Urun();
+                        urun.setAd(ad);
+                        urun.setAciklama(aciklama);
+                        urun.setFiyat(fiyat);
+                        urun.setRenk(renk);
+                        urun.setResimUrl(resimUrl);
+                        urun.setMagaza(magaza);
+                        urun.setAktif(true);
+
+                        // AltKategori ayarla
+                        AltKategori altKategori = kategoriService.getAltKategoriById(altKategoriId);
+                        urun.setAltKategori(altKategori);
+
+                        urun = urunService.saveUrun(urun);
+
+                        // Stokları kaydet
+                        for (int i = 0; i < bedenIds.size(); i++) {
+                                if (i < stoklar.size() && stoklar.get(i) > 0) {
+                                        Beden beden = bedenService.getBedenById(bedenIds.get(i));
+                                        urunService.updateStok(urun.getId(), beden.getId(), stoklar.get(i));
+                                }
+                        }
+
+                        redirectAttributes.addFlashAttribute("basari", "Ürün başarıyla eklendi!");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Ürün eklenemedi: " + e.getMessage());
+                }
                 return "redirect:/sahip/magaza/" + id;
         }
 
         // ============ ÜRÜN DÜZENLEME FORMU ============
-        @GetMapping("/magaza/{magazaId}/urun-duzenle/{urunId}")
-        public String urunDuzenleForm(@PathVariable Long magazaId, @PathVariable Long urunId, Authentication auth,
-                        Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        @GetMapping("/magaza/{magazaId}/urun/{urunId}/duzenle")
+        public String urunDuzenleForm(@PathVariable Long magazaId, @PathVariable Long urunId,
+                        Authentication auth, Model model) {
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                Magaza magaza = magazaService.getMagazaById(magazaId);
 
-                Magaza magaza = magazaRepository.findById(magazaId)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                Urun urun = urunRepository.findById(urunId)
-                                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())
-                                || !urun.getMagaza().getId().equals(magaza.getId())) {
+                if (!magaza.getSahip().getId().equals(sahip.getId())) {
                         return "redirect:/sahip";
                 }
 
-                List<Kategori> kategoriler = kategoriRepository.findAll();
-                List<AltKategori> altKategoriler = altKategoriRepository.findAll();
-                List<Beden> bedenler = bedenRepository.findAll();
-                List<UrunStok> mevcutStoklar = urunStokRepository.findByUrunId(urunId);
+                Urun urun = urunService.getUrunById(urunId);
+                List<Kategori> kategoriler = kategoriService.getTumKategoriler();
+                List<Beden> bedenler = bedenService.getTumBedenler();
+                List<UrunStok> mevcutStoklar = urunService.getUrunStoklari(urunId);
 
+                model.addAttribute("kullanici", sahip);
                 model.addAttribute("magaza", magaza);
                 model.addAttribute("urun", urun);
                 model.addAttribute("kategoriler", kategoriler);
-                model.addAttribute("altKategoriler", altKategoriler);
                 model.addAttribute("bedenler", bedenler);
                 model.addAttribute("mevcutStoklar", mevcutStoklar);
 
@@ -304,7 +263,7 @@ public class MagazaSahibiController {
         }
 
         // ============ ÜRÜN DÜZENLE KAYDET ============
-        @PostMapping("/magaza/{magazaId}/urun-duzenle/{urunId}")
+        @PostMapping("/magaza/{magazaId}/urun/{urunId}/duzenle")
         public String urunDuzenle(@PathVariable Long magazaId,
                         @PathVariable Long urunId,
                         @RequestParam String ad,
@@ -317,307 +276,166 @@ public class MagazaSahibiController {
                         @RequestParam(required = false) List<Integer> stoklar,
                         Authentication auth,
                         RedirectAttributes redirectAttributes) {
+                try {
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                        Magaza magaza = magazaService.getMagazaById(magazaId);
 
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                        if (!magaza.getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu ürünü düzenleme yetkiniz yok!");
+                                return "redirect:/sahip";
+                        }
 
-                Magaza magaza = magazaRepository.findById(magazaId)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+                        Urun urun = urunService.getUrunById(urunId);
+                        urun.setAd(ad);
+                        urun.setAciklama(aciklama);
+                        urun.setFiyat(fiyat);
+                        urun.setRenk(renk);
+                        if (resimUrl != null && !resimUrl.isEmpty()) {
+                                urun.setResimUrl(resimUrl);
+                        }
 
-                Urun urun = urunRepository.findById(urunId)
-                                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
+                        AltKategori altKategori = kategoriService.getAltKategoriById(altKategoriId);
+                        urun.setAltKategori(altKategori);
 
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())
-                                || !urun.getMagaza().getId().equals(magaza.getId())) {
-                        return "redirect:/sahip";
-                }
+                        urunService.saveUrun(urun);
 
-                AltKategori altKategori = altKategoriRepository.findById(altKategoriId)
-                                .orElseThrow(() -> new RuntimeException("Alt kategori bulunamadı"));
-
-                // Ürün Güncelle
-                urun.setAd(ad);
-                urun.setAciklama(aciklama);
-                urun.setFiyat(fiyat);
-                urun.setRenk(renk);
-                urun.setResimUrl(resimUrl);
-                urun.setAltKategori(altKategori);
-                urun = urunRepository.save(urun);
-
-                // Stokları Güncelle (Mevcut stokları silip yeniden ekle veya güncelle -
-                // basitlik için yeniden ekliyoruz)
-                // Not: Gerçek hayatta bu işlem transaction içinde olmalı ve mevcut siparişleri
-                // etkilememeli.
-                // Burada basitçe var olan stok kayıtlarını güncelleyeceğiz veya yenilerini
-                // ekleyeceğiz.
-
-                if (bedenIds != null && stoklar != null) {
-                        List<UrunStok> eskiStoklar = urunStokRepository.findByUrunId(urunId);
-                        urunStokRepository.deleteAll(eskiStoklar); // Öncekileri temizle
-
-                        for (int i = 0; i < bedenIds.size(); i++) {
-                                if (i < stoklar.size() && stoklar.get(i) != null && stoklar.get(i) > 0) {
-                                        Beden beden = bedenRepository.findById(bedenIds.get(i))
-                                                        .orElseThrow(() -> new RuntimeException("Beden bulunamadı"));
-
-                                        UrunStok stok = new UrunStok();
-                                        stok.setUrun(urun);
-                                        stok.setBeden(beden);
-                                        stok.setAdet(stoklar.get(i));
-                                        urunStokRepository.save(stok);
+                        // Stokları güncelle
+                        if (bedenIds != null && stoklar != null) {
+                                for (int i = 0; i < bedenIds.size(); i++) {
+                                        if (i < stoklar.size()) {
+                                                urunService.updateStok(urunId, bedenIds.get(i), stoklar.get(i));
+                                        }
                                 }
                         }
-                }
 
-                redirectAttributes.addFlashAttribute("basari", "Ürün başarıyla güncellendi!");
+                        redirectAttributes.addFlashAttribute("basari", "Ürün güncellendi!");
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Güncelleme hatası: " + e.getMessage());
+                }
                 return "redirect:/sahip/magaza/" + magazaId;
         }
 
         // ============ ÜRÜN PASİFE AL ============
         @PostMapping("/urun/{id}/pasif")
         public String urunPasifYap(@PathVariable Long id, Authentication auth, RedirectAttributes redirectAttributes) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                try {
+                        Urun urun = urunService.getUrunById(id);
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
 
-                Urun urun = urunRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
+                        if (!urun.getMagaza().getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu ürünü düzenleme yetkiniz yok!");
+                                return "redirect:/sahip";
+                        }
 
-                // Sahiplik kontrolü
-                if (!urun.getMagaza().getSahip().getId().equals(kullanici.getId())) {
+                        urunService.deleteUrun(id); // Soft delete
+                        redirectAttributes.addFlashAttribute("basari", "Ürün pasife alındı.");
+                        return "redirect:/sahip/magaza/" + urun.getMagaza().getId();
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Hata: " + e.getMessage());
                         return "redirect:/sahip";
                 }
-
-                Long magazaId = urun.getMagaza().getId();
-
-                urun.setAktif(false);
-                urunRepository.save(urun);
-
-                redirectAttributes.addFlashAttribute("basari", "Ürün pasife alındı!");
-                return "redirect:/sahip/magaza/" + magazaId;
         }
 
         // ============ ÜRÜN AKTİFE AL ============
         @PostMapping("/urun/{id}/aktif")
         public String urunAktifYap(@PathVariable Long id, Authentication auth, RedirectAttributes redirectAttributes) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                try {
+                        Urun urun = urunService.getUrunById(id);
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
 
-                Urun urun = urunRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
+                        if (!urun.getMagaza().getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu ürünü düzenleme yetkiniz yok!");
+                                return "redirect:/sahip";
+                        }
 
-                // Sahiplik kontrolü
-                if (!urun.getMagaza().getSahip().getId().equals(kullanici.getId())) {
+                        urun.setAktif(true);
+                        urunService.saveUrun(urun);
+                        redirectAttributes.addFlashAttribute("basari", "Ürün aktife alındı.");
+                        return "redirect:/sahip/magaza/" + urun.getMagaza().getId();
+                } catch (Exception e) {
+                        redirectAttributes.addFlashAttribute("hata", "Hata: " + e.getMessage());
                         return "redirect:/sahip";
                 }
-
-                Long magazaId = urun.getMagaza().getId();
-
-                urun.setAktif(true);
-                urunRepository.save(urun);
-
-                redirectAttributes.addFlashAttribute("basari", "Ürün aktife alındı!");
-                return "redirect:/sahip/magaza/" + magazaId;
-        }
-
-        // ============ ÜRÜN KALICI SİL ============
-        @PostMapping("/urun/{id}/sil")
-        @Transactional
-        public String urunKaliciSil(@PathVariable Long id, Authentication auth, RedirectAttributes redirectAttributes) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-                Urun urun = urunRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!urun.getMagaza().getSahip().getId().equals(kullanici.getId())) {
-                        return "redirect:/sahip";
-                }
-
-                Long magazaId = urun.getMagaza().getId();
-
-                // Stokları sil
-                urunStokRepository.deleteByUrunId(id);
-
-                // Ürünü kalıcı olarak sil
-                urunRepository.delete(urun);
-
-                redirectAttributes.addFlashAttribute("basari", "Ürün kalıcı olarak silindi!");
-                return "redirect:/sahip/magaza/" + magazaId;
         }
 
         // ============ SİPARİŞ YÖNETİMİ ============
         @GetMapping("/magaza/{id}/siparisler")
         public String magazaSiparisler(@PathVariable Long id, Authentication auth, Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                Magaza magaza = magazaService.getMagazaById(id);
 
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
+                if (!magaza.getSahip().getId().equals(sahip.getId())) {
                         return "redirect:/sahip";
                 }
 
-                // Mağazanın siparişlerini bul
-                List<SiparisFisi> siparisler = siparisFisiRepository.findByMagazaIdOrderBySiparisTarihiDesc(id);
+                List<SiparisFisi> siparisler = siparisService.getMagazaSiparisleri(id);
 
-                // Ciro hesapla
+                // İstatistikler
+                long bekleyenSayisi = siparisler.stream()
+                                .filter(s -> s.getDurum() == SiparisDurum.BEKLEMEDE).count();
+                long hazirlaniyor = siparisler.stream()
+                                .filter(s -> s.getDurum() == SiparisDurum.HAZIRLANIYOR).count();
+                long kargoSayisi = siparisler.stream()
+                                .filter(s -> s.getDurum() == SiparisDurum.KARGODA).count();
+
                 BigDecimal toplamCiro = siparisler.stream()
                                 .filter(s -> s.getDurum() == SiparisDurum.TESLIM_EDILDI)
-                                .map(SiparisFisi::getToplamTutar)
+                                .map(s -> s.getToplamTutar() != null ? s.getToplamTutar() : BigDecimal.ZERO)
                                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-                BigDecimal bekleyenCiro = siparisler.stream()
-                                .filter(s -> s.getDurum() != SiparisDurum.TESLIM_EDILDI
-                                                && s.getDurum() != SiparisDurum.IPTAL)
-                                .map(SiparisFisi::getToplamTutar)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                long bekleyenSiparis = siparisler.stream()
-                                .filter(s -> s.getDurum() == SiparisDurum.BEKLEMEDE)
-                                .count();
-
+                model.addAttribute("kullanici", sahip);
                 model.addAttribute("magaza", magaza);
                 model.addAttribute("siparisler", siparisler);
+                model.addAttribute("bekleyenSayisi", bekleyenSayisi);
+                model.addAttribute("hazirlaniyor", hazirlaniyor);
+                model.addAttribute("kargoSayisi", kargoSayisi);
                 model.addAttribute("toplamCiro", toplamCiro);
-                model.addAttribute("bekleyenCiro", bekleyenCiro);
-                model.addAttribute("bekleyenSiparis", bekleyenSiparis);
 
                 return "sahip/siparisler";
         }
 
         // ============ SİPARİŞ DURUMU GÜNCELLE ============
-        @PostMapping("/siparis/{id}/guncelle")
+        @PostMapping("/siparis/{id}/durum")
         public String siparisDurumuGuncelle(@PathVariable Long id,
                         @RequestParam String durum,
                         Authentication auth,
                         RedirectAttributes redirectAttributes) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-                SiparisFisi siparis = siparisFisiRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Sipariş bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!siparis.getMagaza().getSahip().getId().equals(kullanici.getId())) {
-                        return "redirect:/sahip";
-                }
-
-                Long magazaId = siparis.getMagaza().getId();
-
-                // Durumu güncelle
                 try {
-                        siparis.setDurum(SiparisDurum.valueOf(durum));
-                        siparisFisiRepository.save(siparis);
-                        redirectAttributes.addFlashAttribute("basari", "Sipariş durumu güncellendi!");
-                } catch (IllegalArgumentException e) {
-                        redirectAttributes.addFlashAttribute("hata", "Geçersiz durum!");
-                }
+                        SiparisFisi siparis = siparisService.getSiparisById(id);
+                        Kullanici sahip = kullaniciService.getByUsername(auth.getName());
 
-                return "redirect:/sahip/magaza/" + magazaId + "/siparisler";
-        }
-
-        // ============ SİPARİŞ DÜZENLE SAYFASI ============
-        @GetMapping("/siparis/{id}/duzenle")
-        @Transactional(readOnly = true)
-        public String siparisDuzenleSayfasi(@PathVariable Long id, Authentication auth, Model model,
-                        RedirectAttributes redirectAttributes) {
-                try {
-                        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                        .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-                        SiparisFisi siparis = siparisFisiRepository.findById(id)
-                                        .orElseThrow(() -> new RuntimeException("Sipariş bulunamadı"));
-
-                        // Null kontrolü
-                        if (siparis.getMagaza() == null || siparis.getMagaza().getSahip() == null) {
-                                redirectAttributes.addFlashAttribute("hata", "Sipariş bilgilerinde eksiklik var!");
+                        if (!siparis.getMagaza().getSahip().getId().equals(sahip.getId())) {
+                                redirectAttributes.addFlashAttribute("hata", "Bu siparişi güncelleme yetkiniz yok!");
                                 return "redirect:/sahip";
                         }
 
-                        // Sahiplik kontrolü
-                        if (!siparis.getMagaza().getSahip().getId().equals(kullanici.getId())) {
-                                redirectAttributes.addFlashAttribute("hata", "Bu siparişi görüntüleme yetkiniz yok!");
-                                return "redirect:/sahip";
-                        }
+                        SiparisDurum yeniDurum = SiparisDurum.valueOf(durum);
+                        siparisService.siparisDurumGuncelle(id, yeniDurum);
 
-                        List<SiparisDetay> siparisDetaylari = siparisDetayRepository.findBySiparisFisiId(id);
-
-                        model.addAttribute("siparis", siparis);
-                        model.addAttribute("siparisDetaylari", siparisDetaylari);
-                        model.addAttribute("magaza", siparis.getMagaza());
-
-                        return "sahip/siparis-duzenle";
+                        redirectAttributes.addFlashAttribute("basari", "Sipariş durumu güncellendi.");
+                        return "redirect:/sahip/magaza/" + siparis.getMagaza().getId() + "/siparisler";
                 } catch (Exception e) {
-                        redirectAttributes.addFlashAttribute("hata", "Sipariş yüklenirken hata: " + e.getMessage());
+                        redirectAttributes.addFlashAttribute("hata", "Güncelleme hatası: " + e.getMessage());
                         return "redirect:/sahip";
                 }
         }
 
-        // ============ SİPARİŞ DURUMU GÜNCELLE (Düzenleme sayfasından) ============
-        @PostMapping("/siparis/{id}/durum-guncelle")
-        public String siparisDurumDuzenle(@PathVariable Long id,
-                        @RequestParam String durum,
-                        Authentication auth,
-                        RedirectAttributes redirectAttributes) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        // ============ SİPARİŞ DETAY ============
+        @GetMapping("/siparis/{id}")
+        public String siparisDetay(@PathVariable Long id, Authentication auth, Model model) {
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                SiparisFisi siparis = siparisService.getSiparisById(id);
 
-                SiparisFisi siparis = siparisFisiRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Sipariş bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!siparis.getMagaza().getSahip().getId().equals(kullanici.getId())) {
+                if (!siparis.getMagaza().getSahip().getId().equals(sahip.getId())) {
                         return "redirect:/sahip";
                 }
 
-                // Durumu güncelle
-                try {
-                        siparis.setDurum(SiparisDurum.valueOf(durum));
-                        siparisFisiRepository.save(siparis);
-                        redirectAttributes.addFlashAttribute("basari", "Sipariş durumu güncellendi!");
-                } catch (IllegalArgumentException e) {
-                        redirectAttributes.addFlashAttribute("hata", "Geçersiz durum!");
-                }
+                List<SiparisDetay> detaylar = siparisService.getSiparisDetaylari(id);
 
-                return "redirect:/sahip/siparis/" + id + "/duzenle";
-        }
+                model.addAttribute("kullanici", sahip);
+                model.addAttribute("siparis", siparis);
+                model.addAttribute("detaylar", detaylar);
 
-        // ============ CİRO RAPORLARI ============
-        @GetMapping("/magaza/{id}/ciro")
-        public String magazaCiro(@PathVariable Long id, Authentication auth, Model model) {
-                Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-                Magaza magaza = magazaRepository.findById(id)
-                                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
-
-                // Sahiplik kontrolü
-                if (!magaza.getSahip().getId().equals(kullanici.getId())) {
-                        return "redirect:/sahip";
-                }
-
-                List<SiparisFisi> tumSiparisler = siparisFisiRepository.findByMagazaIdOrderBySiparisTarihiDesc(id);
-
-                // Teslim edilmiş siparişleri filtrele
-                List<SiparisFisi> teslimEdilenler = tumSiparisler.stream()
-                                .filter(s -> s.getDurum() == SiparisDurum.TESLIM_EDILDI)
-                                .toList();
-
-                BigDecimal toplamCiro = teslimEdilenler.stream()
-                                .map(SiparisFisi::getToplamTutar)
-                                .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-                long toplamSiparis = teslimEdilenler.size();
-
-                model.addAttribute("magaza", magaza);
-                model.addAttribute("toplamCiro", toplamCiro);
-                model.addAttribute("toplamSiparis", toplamSiparis);
-                model.addAttribute("siparisler", teslimEdilenler);
-
-                return "sahip/ciro";
+                return "sahip/siparis-detay";
         }
 }

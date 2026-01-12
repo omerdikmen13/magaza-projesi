@@ -1,24 +1,18 @@
 package com.magazaapp.controller;
 
-import com.magazaapp.model.Kullanici;
 import com.magazaapp.model.KullaniciRol;
-import com.magazaapp.repository.KullaniciRepository;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.magazaapp.service.KullaniciService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Optional;
-
 @Controller
 public class KullaniciController {
 
-    private final KullaniciRepository kullaniciRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final KullaniciService kullaniciService;
 
-    public KullaniciController(KullaniciRepository kullaniciRepository, PasswordEncoder passwordEncoder) {
-        this.kullaniciRepository = kullaniciRepository;
-        this.passwordEncoder = passwordEncoder;
+    public KullaniciController(KullaniciService kullaniciService) {
+        this.kullaniciService = kullaniciService;
     }
 
     // ============ GİRİŞ SAYFASI ============
@@ -43,39 +37,20 @@ public class KullaniciController {
             @RequestParam(value = "rol", defaultValue = "MUSTERI") String rol,
             Model model) {
 
-        // Kullanıcı adı kontrolü
-        Optional<Kullanici> varOlan = kullaniciRepository.findByKullaniciAdi(kullaniciAdi);
-        if (varOlan.isPresent()) {
-            model.addAttribute("hata", "Bu kullanıcı adı zaten kayıtlı!");
+        try {
+            // Güvenlik: Sadece MUSTERI ve MAGAZA_SAHIBI rolü kabul et
+            KullaniciRol kullaniciRol = "MAGAZA_SAHIBI".equals(rol)
+                    ? KullaniciRol.MAGAZA_SAHIBI
+                    : KullaniciRol.MUSTERI;
+
+            // Service katmanında tüm validasyon ve kayıt yapılacak
+            kullaniciService.registerUser(kullaniciAdi, email, sifre, ad, soyad, kullaniciRol);
+
+            return "redirect:/giris?kayit=basarili";
+        } catch (RuntimeException e) {
+            model.addAttribute("hata", e.getMessage());
             return "uye-ol";
         }
-
-        // Email kontrolü
-        if (kullaniciRepository.existsByEmail(email)) {
-            model.addAttribute("hata", "Bu email zaten kullanılıyor!");
-            return "uye-ol";
-        }
-
-        // Güvenlik: Sadece MUSTERI ve MAGAZA_SAHIBI rolü kabul et
-        KullaniciRol kullaniciRol;
-        if ("MAGAZA_SAHIBI".equals(rol)) {
-            kullaniciRol = KullaniciRol.MAGAZA_SAHIBI;
-        } else {
-            kullaniciRol = KullaniciRol.MUSTERI;
-        }
-
-        // Yeni kullanıcı oluştur
-        Kullanici kullanici = new Kullanici();
-        kullanici.setKullaniciAdi(kullaniciAdi);
-        kullanici.setEmail(email);
-        kullanici.setSifre(passwordEncoder.encode(sifre));
-        kullanici.setAd(ad);
-        kullanici.setSoyad(soyad);
-        kullanici.setRol(kullaniciRol);
-
-        kullaniciRepository.save(kullanici);
-
-        return "redirect:/giris?kayit=basarili";
     }
 
     // ============ ANA SAYFA ============

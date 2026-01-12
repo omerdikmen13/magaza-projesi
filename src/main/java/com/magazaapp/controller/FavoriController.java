@@ -1,10 +1,10 @@
 package com.magazaapp.controller;
 
 import com.magazaapp.model.*;
-import com.magazaapp.repository.*;
+import com.magazaapp.service.FavoriService;
+import com.magazaapp.service.KullaniciService;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -14,16 +14,13 @@ import java.util.List;
 @Controller
 public class FavoriController {
 
-    private final FavoriRepository favoriRepository;
-    private final KullaniciRepository kullaniciRepository;
-    private final UrunRepository urunRepository;
+    private final FavoriService favoriService;
+    private final KullaniciService kullaniciService;
 
-    public FavoriController(FavoriRepository favoriRepository,
-            KullaniciRepository kullaniciRepository,
-            UrunRepository urunRepository) {
-        this.favoriRepository = favoriRepository;
-        this.kullaniciRepository = kullaniciRepository;
-        this.urunRepository = urunRepository;
+    public FavoriController(FavoriService favoriService,
+            KullaniciService kullaniciService) {
+        this.favoriService = favoriService;
+        this.kullaniciService = kullaniciService;
     }
 
     // ============ FAVORİLERİM SAYFASI ============
@@ -33,10 +30,8 @@ public class FavoriController {
             return "redirect:/giris";
         }
 
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
-        List<Favori> favoriler = favoriRepository.findByKullaniciOrderByEklenmeTarihiDesc(kullanici);
+        Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
+        List<Favori> favoriler = favoriService.getKullaniciFavorileriList(kullanici.getId());
 
         model.addAttribute("favoriler", favoriler);
         model.addAttribute("kullanici", kullanici);
@@ -46,7 +41,6 @@ public class FavoriController {
 
     // ============ FAVORİYE EKLE/KALDIR (TOGGLE) ============
     @PostMapping("/favori/toggle/{urunId}")
-    @Transactional
     public String favoriToggle(@PathVariable Long urunId,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
@@ -55,23 +49,15 @@ public class FavoriController {
         }
 
         try {
-            Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                    .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+            Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
 
-            Urun urun = urunRepository.findById(urunId)
-                    .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
+            // Toggle favori - service katmanında yapılacak
+            boolean eklendi = favoriService.toggleFavori(kullanici.getId(), urunId);
 
-            var mevcutFavori = favoriRepository.findByKullaniciAndUrun(kullanici, urun);
-
-            if (mevcutFavori.isPresent()) {
-                // Favoriden kaldır
-                favoriRepository.delete(mevcutFavori.get());
-                redirectAttributes.addFlashAttribute("basari", "Ürün favorilerden kaldırıldı");
-            } else {
-                // Favoriye ekle
-                Favori favori = new Favori(kullanici, urun);
-                favoriRepository.save(favori);
+            if (eklendi) {
                 redirectAttributes.addFlashAttribute("basari", "Ürün favorilere eklendi");
+            } else {
+                redirectAttributes.addFlashAttribute("basari", "Ürün favorilerden kaldırıldı");
             }
 
         } catch (Exception e) {
@@ -83,7 +69,6 @@ public class FavoriController {
 
     // ============ FAVORİDEN KALDIR ============
     @PostMapping("/favori/kaldir/{urunId}")
-    @Transactional
     public String favoriKaldir(@PathVariable Long urunId,
             Authentication auth,
             RedirectAttributes redirectAttributes) {
@@ -92,13 +77,9 @@ public class FavoriController {
         }
 
         try {
-            Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(auth.getName())
-                    .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+            Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
 
-            Urun urun = urunRepository.findById(urunId)
-                    .orElseThrow(() -> new RuntimeException("Ürün bulunamadı"));
-
-            favoriRepository.deleteByKullaniciAndUrun(kullanici, urun);
+            favoriService.removeFavori(kullanici.getId(), urunId);
             redirectAttributes.addFlashAttribute("basari", "Ürün favorilerden kaldırıldı");
 
         } catch (Exception e) {

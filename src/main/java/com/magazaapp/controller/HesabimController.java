@@ -1,9 +1,8 @@
 package com.magazaapp.controller;
 
 import com.magazaapp.model.Kullanici;
-import com.magazaapp.repository.KullaniciRepository;
+import com.magazaapp.service.KullaniciService;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -13,20 +12,16 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 @RequestMapping("/hesabim")
 public class HesabimController {
 
-    private final KullaniciRepository kullaniciRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final KullaniciService kullaniciService;
 
-    public HesabimController(KullaniciRepository kullaniciRepository, PasswordEncoder passwordEncoder) {
-        this.kullaniciRepository = kullaniciRepository;
-        this.passwordEncoder = passwordEncoder;
+    public HesabimController(KullaniciService kullaniciService) {
+        this.kullaniciService = kullaniciService;
     }
 
     // Hesabım sayfası
     @GetMapping
     public String hesabim(Authentication authentication, Model model) {
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
-
+        Kullanici kullanici = kullaniciService.getByUsername(authentication.getName());
         model.addAttribute("kullanici", kullanici);
         return "hesabim";
     }
@@ -42,24 +37,17 @@ public class HesabimController {
             @RequestParam(required = false) String adres,
             RedirectAttributes redirectAttributes) {
 
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        try {
+            Kullanici kullanici = kullaniciService.getByUsername(authentication.getName());
 
-        // Email değişmişse ve başkası kullanıyorsa kontrol et
-        if (!kullanici.getEmail().equals(email) && kullaniciRepository.existsByEmail(email)) {
-            redirectAttributes.addFlashAttribute("hata", "Bu email adresi zaten kullanımda!");
-            return "redirect:/hesabim";
+            // Service katmanında email uniqueness kontrolü yapılacak
+            kullaniciService.updateProfile(kullanici.getId(), ad, soyad, email, telefon, adres);
+
+            redirectAttributes.addFlashAttribute("basari", "Profil bilgileriniz güncellendi!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("hata", e.getMessage());
         }
 
-        kullanici.setAd(ad);
-        kullanici.setSoyad(soyad);
-        kullanici.setEmail(email);
-        kullanici.setTelefon(telefon);
-        kullanici.setAdres(adres);
-
-        kullaniciRepository.save(kullanici);
-
-        redirectAttributes.addFlashAttribute("basari", "Profil bilgileriniz güncellendi!");
         return "redirect:/hesabim";
     }
 
@@ -72,30 +60,17 @@ public class HesabimController {
             @RequestParam String yeniSifreTekrar,
             RedirectAttributes redirectAttributes) {
 
-        Kullanici kullanici = kullaniciRepository.findByKullaniciAdi(authentication.getName())
-                .orElseThrow(() -> new RuntimeException("Kullanıcı bulunamadı"));
+        try {
+            Kullanici kullanici = kullaniciService.getByUsername(authentication.getName());
 
-        // Mevcut şifre kontrolü
-        if (!passwordEncoder.matches(mevcutSifre, kullanici.getSifre())) {
-            redirectAttributes.addFlashAttribute("sifreHata", "Mevcut şifreniz hatalı!");
-            return "redirect:/hesabim";
+            // Service katmanında tüm validasyon yapılacak
+            kullaniciService.changePassword(kullanici.getId(), mevcutSifre, yeniSifre, yeniSifreTekrar);
+
+            redirectAttributes.addFlashAttribute("sifreBasari", "Şifreniz başarıyla değiştirildi!");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("sifreHata", e.getMessage());
         }
 
-        // Yeni şifre kontrolü
-        if (!yeniSifre.equals(yeniSifreTekrar)) {
-            redirectAttributes.addFlashAttribute("sifreHata", "Yeni şifreler eşleşmiyor!");
-            return "redirect:/hesabim";
-        }
-
-        if (yeniSifre.length() < 6) {
-            redirectAttributes.addFlashAttribute("sifreHata", "Şifre en az 6 karakter olmalı!");
-            return "redirect:/hesabim";
-        }
-
-        kullanici.setSifre(passwordEncoder.encode(yeniSifre));
-        kullaniciRepository.save(kullanici);
-
-        redirectAttributes.addFlashAttribute("sifreBasari", "Şifreniz başarıyla değiştirildi!");
         return "redirect:/hesabim";
     }
 }

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="tr" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ödeme Başarılı - Mağaza Sistemi</title>
+    <link rel="stylesheet" th:href="@{/style.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .success-container {
+            max-width: 600px;
+            margin: 80px auto;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .success-icon {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, #00b894 0%, #00cec9 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 30px;
+            animation: scaleIn 0.5s ease;
+        }
+
+        @keyframes scaleIn {
+            0% {
+                transform: scale(0);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .success-icon i {
+            font-size: 3.5rem;
+            color: white;
+        }
+
+        .success-title {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 15px;
+        }
+
+        .success-message {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .order-number {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 20px 30px;
+            border-radius: var(--radius-lg);
+            display: inline-block;
+            margin-bottom: 30px;
+        }
+
+        .order-number span {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .success-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-orders {
+            background: var(--gradient-primary);
+            color: white;
+            padding: 15px 30px;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .btn-orders:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-home {
+            background: white;
+            color: var(--dark);
+            border: 2px solid var(--gray-300);
+            padding: 15px 30px;
+            border-radius: var(--radius-lg);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- NAVBAR -->
+    <nav th:replace="~{fragments/navbar :: navbar}"></nav>
+
+    <div class="container">
+        <div class="success-container">
+
+            <div class="success-icon">
+                <i class="fas fa-check"></i>
+            </div>
+
+            <h1 class="success-title">Ödeme Başarılı!</h1>
+
+            <p class="success-message">
+                Siparişiniz başarıyla oluşturuldu. Hazırlık aşamasına geçti.
+            </p>
+
+            <div class="order-number" th:if="${siparisId}">
+                Sipariş No: <span th:text="'#' + ${siparisId}"></span>
+            </div>
+
+            <div class="success-actions">
+                <a th:href="@{/siparislerim}" class="btn-orders">
+                    <i class="fas fa-box"></i> Siparişlerime Git
+                </a>
+                <a th:href="@{/}" class="btn-home">
+                    <i class="fas fa-home"></i> Ana Sayfa
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>

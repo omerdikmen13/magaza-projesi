@@ -3,9 +3,9 @@ package com.magazaapp.controller;
 import com.magazaapp.model.Kategori;
 import com.magazaapp.model.Magaza;
 import com.magazaapp.model.Urun;
-import com.magazaapp.repository.KategoriRepository;
-import com.magazaapp.repository.MagazaRepository;
-import com.magazaapp.repository.UrunRepository;
+import com.magazaapp.service.MagazaService;
+import com.magazaapp.service.UrunService;
+import com.magazaapp.service.KategoriService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -16,28 +16,28 @@ import java.util.List;
 @RequestMapping("/magazalar")
 public class MagazaController {
 
-    private final MagazaRepository magazaRepository;
-    private final UrunRepository urunRepository;
-    private final KategoriRepository kategoriRepository;
+    private final MagazaService magazaService;
+    private final UrunService urunService;
+    private final KategoriService kategoriService;
 
-    public MagazaController(MagazaRepository magazaRepository, UrunRepository urunRepository,
-            KategoriRepository kategoriRepository) {
-        this.magazaRepository = magazaRepository;
-        this.urunRepository = urunRepository;
-        this.kategoriRepository = kategoriRepository;
+    public MagazaController(MagazaService magazaService, UrunService urunService,
+            KategoriService kategoriService) {
+        this.magazaService = magazaService;
+        this.urunService = urunService;
+        this.kategoriService = kategoriService;
     }
 
     // ============ MAĞAZA LİSTESİ (KATEGORİYE GÖRE FİLTRELİ) ============
     @GetMapping
     public String magazaListesi(@RequestParam(required = false) Long kategoriId, Model model) {
-        List<Magaza> magazalar = magazaRepository.findByAktifTrue();
-        List<Kategori> kategoriler = kategoriRepository.findAll();
+        List<Magaza> magazalar = magazaService.getTumMagazalar();
+        List<Kategori> kategoriler = kategoriService.getTumKategoriler();
 
         if (kategoriId != null) {
-            // Kategoriİye göre ürünleri filtrele
-            List<Urun> urunler = urunRepository.findByFiltre(null, kategoriId, null);
+            // Kategoriye göre ürünleri filtrele
+            List<Urun> urunler = urunService.getUrunlerByKategori(kategoriId);
             model.addAttribute("urunler", urunler);
-            model.addAttribute("secilenKategori", kategoriRepository.findById(kategoriId).orElse(null));
+            model.addAttribute("secilenKategori", kategoriService.getKategoriById(kategoriId));
         }
 
         model.addAttribute("magazalar", magazalar);
@@ -53,26 +53,21 @@ public class MagazaController {
             @RequestParam(required = false) Long kategoriId,
             @RequestParam(required = false) String siralama,
             Model model) {
-        Magaza magaza = magazaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+        Magaza magaza = magazaService.getMagazaById(id);
 
         List<Urun> urunler;
         if (kategoriId != null) {
-            urunler = urunRepository.findByFiltre(id, kategoriId, null);
+            urunler = urunService.getUrunlerByMagazaAndKategori(id, kategoriId);
         } else {
-            urunler = urunRepository.findByMagazaIdAndAktifTrue(id);
+            urunler = magazaService.getMagazaninUrunleri(id);
         }
 
         // Fiyat sıralaması
         if (siralama != null) {
-            if ("fiyat-artan".equals(siralama)) {
-                urunler.sort((a, b) -> a.getFiyat().compareTo(b.getFiyat()));
-            } else if ("fiyat-azalan".equals(siralama)) {
-                urunler.sort((a, b) -> b.getFiyat().compareTo(a.getFiyat()));
-            }
+            urunler = urunService.siralaUrunler(urunler, siralama);
         }
 
-        List<Kategori> kategoriler = kategoriRepository.findAll();
+        List<Kategori> kategoriler = kategoriService.getTumKategoriler();
 
         model.addAttribute("magaza", magaza);
         model.addAttribute("urunler", urunler);

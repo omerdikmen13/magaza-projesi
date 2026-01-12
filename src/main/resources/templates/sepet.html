@@ -128,10 +128,18 @@
                                     Adres</p>
                             </div>
 
+                            <!-- iyzico ile Ödeme -->
+                            <a th:href="@{/odeme}" class="btn btn-primary"
+                                style="width: 100%; font-size: 1.1rem; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; text-decoration: none;">
+                                <i class="fas fa-credit-card"></i> Ödeme Yap
+                            </a>
+
+                            <div style="text-align: center; color: var(--gray-400); margin: 12px 0;">veya</div>
+
                             <form th:action="@{/sepet/siparis-ver}" method="post">
-                                <button type="submit" class="btn btn-primary"
-                                    style="width: 100%; font-size: 1.1rem; padding: 16px;">
-                                    <i class="fas fa-check-circle"></i> Siparişi Tamamla
+                                <button type="submit" class="btn btn-secondary"
+                                    style="width: 100%; font-size: 0.95rem; padding: 14px;">
+                                    <i class="fas fa-check-circle"></i> Kapıda Ödeme
                                 </button>
                             </form>
 

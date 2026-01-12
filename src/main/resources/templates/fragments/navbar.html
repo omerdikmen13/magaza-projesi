@@ -13,7 +13,7 @@
         <!-- ============ MAĞAZA SAHİBİ MENÜSÜ ============ -->
         <th:block sec:authorize="isAuthenticated()">
             <th:block
-                th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MAGAZA_SAHIBI}">
+                th:if="${kullanici != null and kullanici.rol != null and kullanici.rol.name() == 'MAGAZA_SAHIBI'}">
 
                 <!-- Dashboard/Panel -->
                 <a th:href="@{/sahip}" class="nav-link"
@@ -34,7 +34,7 @@
             </th:block>
 
             <!-- ============ ADMIN MENÜSÜ ============ -->
-            <th:block th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).ADMIN}">
+            <th:block th:if="${kullanici != null and kullanici.rol != null and kullanici.rol.name() == 'ADMIN'}">
                 <a th:href="@{/admin}" class="nav-link"
                     style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); color: white; font-weight: 600;">
                     <i class="fas fa-shield-alt"></i> Admin
@@ -57,7 +57,7 @@
             </th:block>
 
             <!-- ============ MÜŞTERİ MENÜSÜ ============ -->
-            <th:block th:if="${kullanici != null and kullanici.rol == T(com.magazaapp.model.KullaniciRol).MUSTERI}">
+            <th:block th:if="${kullanici != null and kullanici.rol != null and kullanici.rol.name() == 'MUSTERI'}">
                 <a th:href="@{/magazalar}" class="nav-link">
                     <i class="fas fa-shopping-bag"></i> Mağazalar
                 </a>

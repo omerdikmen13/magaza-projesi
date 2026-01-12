@@ -26,3 +26,9 @@ spring.thymeleaf.cache=false
 # API Key almak için: https://aistudio.google.com/app/apikey
 gemini.api.key=YOUR_GEMINI_API_KEY
 gemini.model=gemini-2.0-flash-exp
+
+# ===============================================
+# Ödeme Sistemi
+# Mock ödeme sistemi kullanılıyor - API key gerektirmez
+# Test kartı: 4111 1111 1111 1111
+# ===============================================

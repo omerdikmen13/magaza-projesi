@@ -14,16 +14,31 @@
     <!-- NAVBAR -->
     <nav th:replace="~{fragments/navbar :: navbar}"></nav>
 
-    <!-- HERO SECTION WITH VIDEO BACKGROUND -->
-    <div class="hero" style="position: relative; overflow: hidden;">
-        <!-- Video Background -->
-        <video autoplay muted loop playsinline style="position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; 
-                      transform: translate(-50%, -50%); z-index: 0; object-fit: cover;">
-            <source th:src="@{/video/background.mp4}" type="video/mp4">
-        </video>
+    <!-- HERO SECTION WITH GRADIENT BACKGROUND -->
+    <div class="hero" style="position: relative; overflow: hidden; 
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                background-size: 400% 400%;
+                animation: gradientShift 15s ease infinite;">
+
+        <!-- Animated Gradient Background -->
+        <style>
+            @keyframes gradientShift {
+                0% {
+                    background-position: 0% 50%;
+                }
+
+                50% {
+                    background-position: 100% 50%;
+                }
+
+                100% {
+                    background-position: 0% 50%;
+                }
+            }
+        </style>
 
         <!-- Overlay for better text readability -->
-        <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.35); z-index: 1;">
+        <div style="position: absolute; inset: 0; background: rgba(0, 0, 0, 0.2); z-index: 1;">
         </div>
 
         <!-- Content -->

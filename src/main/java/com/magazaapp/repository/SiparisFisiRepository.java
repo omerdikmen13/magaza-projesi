@@ -8,7 +8,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
@@ -21,6 +20,17 @@ public interface SiparisFisiRepository extends JpaRepository<SiparisFisi, Long> 
         List<SiparisFisi> findByMagazaIdOrderBySiparisTarihiDesc(Long magazaId);
 
         List<SiparisFisi> findByMagazaIdAndDurum(Long magazaId, SiparisDurum durum);
+
+        // ========== DATE-ORDERED METHODS (Service Layer için) ==========
+
+        // Kullanıcının siparişlerini tarihe göre sırala
+        List<SiparisFisi> findByKullaniciIdOrderBySiparisTarihiDesc(Long kullaniciId);
+
+        // Mağazanın siparişlerini tarihe göre sırala (zaten var, tekrar yok)
+        // List<SiparisFisi> findByMagazaIdOrderBySiparisTarihiDesc(Long magazaId);
+
+        // Tüm siparişleri tarihe göre sırala (Admin için)
+        List<SiparisFisi> findAllByOrderBySiparisTarihiDesc();
 
         // Günlük ciro
         @Query("SELECT COALESCE(SUM(s.toplamTutar), 0) FROM SiparisFisi s " +
