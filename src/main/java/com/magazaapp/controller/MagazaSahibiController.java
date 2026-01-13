@@ -163,7 +163,7 @@ public class MagazaSahibiController {
         }
 
         // ============ ÜRÜN EKLEME FORMU ============
-        @GetMapping("/magaza/{id}/urun/ekle")
+        @GetMapping({ "/magaza/{id}/urun/ekle", "/magaza/{id}/urun-ekle" })
         public String urunEkleForm(@PathVariable Long id, Authentication auth, Model model) {
                 Kullanici sahip = kullaniciService.getByUsername(auth.getName());
                 Magaza magaza = magazaService.getMagazaById(id);
@@ -184,7 +184,7 @@ public class MagazaSahibiController {
         }
 
         // ============ ÜRÜN KAYDET ============
-        @PostMapping("/magaza/{id}/urun/ekle")
+        @PostMapping({ "/magaza/{id}/urun/ekle", "/magaza/{id}/urun-ekle" })
         public String urunEkle(@PathVariable Long id,
                         @RequestParam String ad,
                         @RequestParam String aciklama,
@@ -237,7 +237,7 @@ public class MagazaSahibiController {
         }
 
         // ============ ÜRÜN DÜZENLEME FORMU ============
-        @GetMapping("/magaza/{magazaId}/urun/{urunId}/duzenle")
+        @GetMapping({ "/magaza/{magazaId}/urun/{urunId}/duzenle", "/magaza/{magazaId}/urun-duzenle/{urunId}" })
         public String urunDuzenleForm(@PathVariable Long magazaId, @PathVariable Long urunId,
                         Authentication auth, Model model) {
                 Kullanici sahip = kullaniciService.getByUsername(auth.getName());
@@ -263,7 +263,7 @@ public class MagazaSahibiController {
         }
 
         // ============ ÜRÜN DÜZENLE KAYDET ============
-        @PostMapping("/magaza/{magazaId}/urun/{urunId}/duzenle")
+        @PostMapping({ "/magaza/{magazaId}/urun/{urunId}/duzenle", "/magaza/{magazaId}/urun-duzenle/{urunId}" })
         public String urunDuzenle(@PathVariable Long magazaId,
                         @PathVariable Long urunId,
                         @RequestParam String ad,
@@ -356,6 +356,48 @@ public class MagazaSahibiController {
                         redirectAttributes.addFlashAttribute("hata", "Hata: " + e.getMessage());
                         return "redirect:/sahip";
                 }
+        }
+
+        // ============ CİRO GÖRÜNTÜLEME ============
+        @GetMapping("/magaza/{id}/ciro")
+        public String magazaCiro(@PathVariable Long id, Authentication auth, Model model) {
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                Magaza magaza = magazaService.getMagazaById(id);
+
+                if (!magaza.getSahip().getId().equals(sahip.getId())) {
+                        return "redirect:/sahip";
+                }
+
+                List<SiparisFisi> siparisler = siparisService.getMagazaSiparisleri(id);
+
+                // Ciro hesapla
+                BigDecimal toplamCiro = siparisler.stream()
+                                .filter(s -> s.getDurum() == SiparisDurum.TESLIM_EDILDI)
+                                .map(s -> s.getToplamTutar() != null ? s.getToplamTutar() : BigDecimal.ZERO)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                BigDecimal bekleyenCiro = siparisler.stream()
+                                .filter(s -> s.getDurum() != SiparisDurum.TESLIM_EDILDI
+                                                && s.getDurum() != SiparisDurum.IPTAL)
+                                .map(s -> s.getToplamTutar() != null ? s.getToplamTutar() : BigDecimal.ZERO)
+                                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+                long teslimEdilen = siparisler.stream()
+                                .filter(s -> s.getDurum() == SiparisDurum.TESLIM_EDILDI).count();
+                long bekleyen = siparisler.stream()
+                                .filter(s -> s.getDurum() != SiparisDurum.TESLIM_EDILDI
+                                                && s.getDurum() != SiparisDurum.IPTAL)
+                                .count();
+
+                model.addAttribute("kullanici", sahip);
+                model.addAttribute("magaza", magaza);
+                model.addAttribute("toplamCiro", toplamCiro);
+                model.addAttribute("bekleyenCiro", bekleyenCiro);
+                model.addAttribute("teslimEdilen", teslimEdilen);
+                model.addAttribute("bekleyenSayisi", bekleyen);
+                model.addAttribute("siparisler", siparisler);
+
+                return "sahip/ciro";
         }
 
         // ============ SİPARİŞ YÖNETİMİ ============

@@ -2,10 +2,14 @@ package com.magazaapp.service;
 
 import com.magazaapp.model.Kullanici;
 import com.magazaapp.model.Mesaj;
+import com.magazaapp.model.Magaza;
 import com.magazaapp.repository.MesajRepository;
+import com.magazaapp.repository.KullaniciRepository;
+import com.magazaapp.repository.MagazaRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -17,9 +21,15 @@ import java.util.List;
 public class MesajService {
 
     private final MesajRepository mesajRepository;
+    private final KullaniciRepository kullaniciRepository;
+    private final MagazaRepository magazaRepository;
 
-    public MesajService(MesajRepository mesajRepository) {
+    public MesajService(MesajRepository mesajRepository,
+            KullaniciRepository kullaniciRepository,
+            MagazaRepository magazaRepository) {
         this.mesajRepository = mesajRepository;
+        this.kullaniciRepository = kullaniciRepository;
+        this.magazaRepository = magazaRepository;
     }
 
     /**
@@ -132,8 +142,21 @@ public class MesajService {
      */
     @Transactional
     public void musteridenMesajGonder(Long musteriId, Long magazaId, String icerik) {
-        // Controller'dan kullanılacak - repository kullanımı controller'da kalıyor
-        throw new UnsupportedOperationException("Bu metot controller'da implement edilecek");
+        Kullanici musteri = kullaniciRepository.findById(musteriId)
+                .orElseThrow(() -> new RuntimeException("Müşteri bulunamadı"));
+        Magaza magaza = magazaRepository.findById(magazaId)
+                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+
+        Mesaj mesaj = new Mesaj();
+        mesaj.setGonderen(musteri);
+        mesaj.setMusteri(musteri);
+        mesaj.setMagaza(magaza);
+        mesaj.setIcerik(icerik);
+        mesaj.setTarih(LocalDateTime.now());
+        mesaj.setOkundu(false);
+        mesaj.setGonderenMusteri(true);
+
+        mesajRepository.save(mesaj);
     }
 
     /**
@@ -141,15 +164,37 @@ public class MesajService {
      */
     @Transactional
     public void magazadanMesajGonder(Long magazaSahibiId, Long magazaId, Long musteriId, String icerik) {
-        // Controller'dan kullanılacak - repository kullanımı controller'da kalıyor
-        throw new UnsupportedOperationException("Bu metot controller'da implement edilecek");
+        Kullanici sahip = kullaniciRepository.findById(magazaSahibiId)
+                .orElseThrow(() -> new RuntimeException("Mağaza sahibi bulunamadı"));
+        Kullanici musteri = kullaniciRepository.findById(musteriId)
+                .orElseThrow(() -> new RuntimeException("Müşteri bulunamadı"));
+        Magaza magaza = magazaRepository.findById(magazaId)
+                .orElseThrow(() -> new RuntimeException("Mağaza bulunamadı"));
+
+        Mesaj mesaj = new Mesaj();
+        mesaj.setGonderen(sahip);
+        mesaj.setMusteri(musteri);
+        mesaj.setMagaza(magaza);
+        mesaj.setIcerik(icerik);
+        mesaj.setTarih(LocalDateTime.now());
+        mesaj.setOkundu(false);
+        mesaj.setGonderenMusteri(false);
+
+        mesajRepository.save(mesaj);
     }
 
     /**
      * Sahip mağazalar için okunmamış mesaj sayıları
      */
-    public java.util.Map<com.magazaapp.model.Magaza, Long> getSahipMagazaOkunmamisSayilari(Long sahipId) {
-        // Controller'da implement edilecek - repository logic gerekiyor
-        throw new UnsupportedOperationException("Bu metot controller'da implement edilecek");
+    public java.util.Map<Magaza, Long> getSahipMagazaOkunmamisSayilari(Long sahipId) {
+        List<Magaza> magazalar = magazaRepository.findBySahipId(sahipId);
+        java.util.Map<Magaza, Long> sonuc = new java.util.LinkedHashMap<>();
+
+        for (Magaza magaza : magazalar) {
+            Long okunmamisSayisi = mesajRepository.countOkunmamisByMagazaId(magaza.getId());
+            sonuc.put(magaza, okunmamisSayisi != null ? okunmamisSayisi : 0L);
+        }
+
+        return sonuc;
     }
 }
