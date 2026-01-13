@@ -33,14 +33,38 @@ public class OdemeRestController {
      * POST /api/odeme/basla
      */
     @PostMapping("/basla")
-    public ResponseEntity<?> odemeBaslat(Authentication auth) {
+    public ResponseEntity<?> odemeBaslat(
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
+            Authentication auth) {
         try {
-            if (auth == null) {
+            Kullanici kullanici = null;
+
+            // Önce Spring Security Authentication'dan dene
+            if (auth != null && auth.getName() != null) {
+                kullanici = kullaniciService.getByUsername(auth.getName());
+            }
+
+            // Yoksa header'dan token ile dene (mobil app simple-token için)
+            if (kullanici == null && authHeader != null) {
+                String token = authHeader.replace("Bearer ", "").trim();
+                // simple-token-{userId} formatından userId parse et
+                if (token.startsWith("simple-token-")) {
+                    try {
+                        String userIdStr = token.replace("simple-token-", "");
+                        Long userId = Long.parseLong(userIdStr);
+                        kullanici = kullaniciService.getKullaniciById(userId);
+                    } catch (Exception e) {
+                        // Parse hatası, devam et
+                    }
+                }
+            }
+
+            if (kullanici == null) {
                 return ResponseEntity.status(401).body(Map.of(
                         "success", false,
                         "error", "Giriş yapmanız gerekiyor"));
             }
-            Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
+
             MockOdemeService.OdemeBaslatSonuc sonuc = mockOdemeService.odemeBaslat(kullanici);
 
             Map<String, Object> response = new HashMap<>();
@@ -63,7 +87,9 @@ public class OdemeRestController {
      * POST /api/odeme/tamamla
      */
     @PostMapping("/tamamla")
-    public ResponseEntity<?> odemeTamamla(@RequestBody OdemeTamamlaRequest request,
+    public ResponseEntity<?> odemeTamamla(
+            @RequestBody OdemeTamamlaRequest request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader,
             Authentication auth) {
         try {
             MockOdemeService.OdemeSonuc sonuc = mockOdemeService.odemeTamamla(
@@ -74,12 +100,33 @@ public class OdemeRestController {
                     request.getKartSahibi());
 
             if (sonuc.isBasarili()) {
-                if (auth == null) {
+                Kullanici kullanici = null;
+
+                // Önce Spring Security Authentication'dan dene
+                if (auth != null && auth.getName() != null) {
+                    kullanici = kullaniciService.getByUsername(auth.getName());
+                }
+
+                // Yoksa header'dan token ile dene (mobil app simple-token için)
+                if (kullanici == null && authHeader != null) {
+                    String token = authHeader.replace("Bearer ", "").trim();
+                    if (token.startsWith("simple-token-")) {
+                        try {
+                            String userIdStr = token.replace("simple-token-", "");
+                            Long userId = Long.parseLong(userIdStr);
+                            kullanici = kullaniciService.getKullaniciById(userId);
+                        } catch (Exception e) {
+                            // Parse hatası
+                        }
+                    }
+                }
+
+                if (kullanici == null) {
                     return ResponseEntity.status(401).body(Map.of(
                             "success", false,
                             "error", "Giriş yapmanız gerekiyor"));
                 }
-                Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
+
                 SiparisFisi siparis = siparisService.sepettenSiparisOlustur(kullanici.getId());
 
                 Odeme odeme = sonuc.getOdeme();
