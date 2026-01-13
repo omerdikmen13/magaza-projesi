@@ -437,7 +437,7 @@ public class MagazaSahibiController {
         }
 
         // ============ SİPARİŞ DURUMU GÜNCELLE ============
-        @PostMapping("/siparis/{id}/durum")
+        @PostMapping({ "/siparis/{id}/durum", "/siparis/{id}/guncelle" })
         public String siparisDurumuGuncelle(@PathVariable Long id,
                         @RequestParam String durum,
                         Authentication auth,
@@ -479,5 +479,26 @@ public class MagazaSahibiController {
                 model.addAttribute("detaylar", detaylar);
 
                 return "sahip/siparis-detay";
+        }
+
+        // ============ SİPARİŞ DÜZENLEME SAYFASI ============
+        @GetMapping("/siparis/{id}/duzenle")
+        public String siparisDuzenleForm(@PathVariable Long id, Authentication auth, Model model) {
+                Kullanici sahip = kullaniciService.getByUsername(auth.getName());
+                SiparisFisi siparis = siparisService.getSiparisById(id);
+
+                if (!siparis.getMagaza().getSahip().getId().equals(sahip.getId())) {
+                        return "redirect:/sahip";
+                }
+
+                List<SiparisDetay> detaylar = siparisService.getSiparisDetaylari(id);
+
+                model.addAttribute("kullanici", sahip);
+                model.addAttribute("magaza", siparis.getMagaza());
+                model.addAttribute("siparis", siparis);
+                model.addAttribute("detaylar", detaylar);
+                model.addAttribute("durumlar", SiparisDurum.values());
+
+                return "sahip/siparis-duzenle";
         }
 }
