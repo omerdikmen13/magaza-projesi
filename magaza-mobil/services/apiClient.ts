@@ -3,10 +3,10 @@ import Constants from 'expo-constants';
 import { useAuthStore } from '../stores/authStore';
 
 // Backend URL - Environment variable veya Expo config'den al
-// Development: ngrok URL, Production: gerçek sunucu URL'si
+// EC2 sunucu adresi
 const BASE_URL = Constants.expoConfig?.extra?.apiUrl
     || process.env.EXPO_PUBLIC_API_URL
-    || 'http://13.53.132.4:8080';
+    || 'http://13.60.76.224:8080';
 
 export const apiClient = axios.create({
     baseURL: BASE_URL,

@@ -134,7 +134,7 @@ export const siparislerApi = {
 // =============== AI API ===============
 export const aiApi = {
     getOneri: async (soru: string) => {
-        const response = await apiClient.post('/api/ai/oneri', { soru });
+        const response = await apiClient.post('/api/ai/generate', { prompt: soru });
         // Backend 'response' gönderiyor, 'cevap' olarak map'liyoruz
         return {
             cevap: response.data.response || response.data.cevap || 'Yanıt alınamadı.',

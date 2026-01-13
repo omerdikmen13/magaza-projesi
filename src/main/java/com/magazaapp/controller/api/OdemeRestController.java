@@ -35,6 +35,11 @@ public class OdemeRestController {
     @PostMapping("/basla")
     public ResponseEntity<?> odemeBaslat(Authentication auth) {
         try {
+            if (auth == null) {
+                return ResponseEntity.status(401).body(Map.of(
+                        "success", false,
+                        "error", "Giriş yapmanız gerekiyor"));
+            }
             Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
             MockOdemeService.OdemeBaslatSonuc sonuc = mockOdemeService.odemeBaslat(kullanici);
 
@@ -69,6 +74,11 @@ public class OdemeRestController {
                     request.getKartSahibi());
 
             if (sonuc.isBasarili()) {
+                if (auth == null) {
+                    return ResponseEntity.status(401).body(Map.of(
+                            "success", false,
+                            "error", "Giriş yapmanız gerekiyor"));
+                }
                 Kullanici kullanici = kullaniciService.getByUsername(auth.getName());
                 SiparisFisi siparis = siparisService.sepettenSiparisOlustur(kullanici.getId());
 

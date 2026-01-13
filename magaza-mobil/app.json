@@ -44,7 +44,7 @@
       "fallbackToCacheTimeout": 0
     },
     "extra": {
-      "apiUrl": "https://computative-signe-tidily.ngrok-free.dev"
+      "apiUrl": "http://13.60.76.224:8080"
     }
   }
 }
