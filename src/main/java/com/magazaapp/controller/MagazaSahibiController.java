@@ -21,16 +21,19 @@ public class MagazaSahibiController {
         private final SiparisService siparisService;
         private final KategoriService kategoriService;
         private final BedenService bedenService;
+        private final AltKategoriService altKategoriService;
 
         public MagazaSahibiController(MagazaService magazaService, KullaniciService kullaniciService,
                         UrunService urunService, SiparisService siparisService,
-                        KategoriService kategoriService, BedenService bedenService) {
+                        KategoriService kategoriService, BedenService bedenService,
+                        AltKategoriService altKategoriService) {
                 this.magazaService = magazaService;
                 this.kullaniciService = kullaniciService;
                 this.urunService = urunService;
                 this.siparisService = siparisService;
                 this.kategoriService = kategoriService;
                 this.bedenService = bedenService;
+                this.altKategoriService = altKategoriService;
         }
 
         // ============ PANEL ANA SAYFA ============
@@ -173,11 +176,13 @@ public class MagazaSahibiController {
                 }
 
                 List<Kategori> kategoriler = kategoriService.getTumKategoriler();
+                List<AltKategori> altKategoriler = altKategoriService.getTumAltKategoriler();
                 List<Beden> bedenler = bedenService.getTumBedenler();
 
                 model.addAttribute("kullanici", sahip);
                 model.addAttribute("magaza", magaza);
                 model.addAttribute("kategoriler", kategoriler);
+                model.addAttribute("altKategoriler", altKategoriler);
                 model.addAttribute("bedenler", bedenler);
 
                 return "sahip/urun-ekle";
@@ -249,6 +254,7 @@ public class MagazaSahibiController {
 
                 Urun urun = urunService.getUrunById(urunId);
                 List<Kategori> kategoriler = kategoriService.getTumKategoriler();
+                List<AltKategori> altKategoriler = altKategoriService.getTumAltKategoriler();
                 List<Beden> bedenler = bedenService.getTumBedenler();
                 List<UrunStok> mevcutStoklar = urunService.getUrunStoklari(urunId);
 
@@ -256,6 +262,7 @@ public class MagazaSahibiController {
                 model.addAttribute("magaza", magaza);
                 model.addAttribute("urun", urun);
                 model.addAttribute("kategoriler", kategoriler);
+                model.addAttribute("altKategoriler", altKategoriler);
                 model.addAttribute("bedenler", bedenler);
                 model.addAttribute("mevcutStoklar", mevcutStoklar);
 
