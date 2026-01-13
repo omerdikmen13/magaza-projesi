@@ -427,9 +427,9 @@
         var safeText = escapeHtml(text);
         safeText = safeText.replace(/\n/g, '<br>');
 
-        // Mağaza Linkleri
+        // Mağaza Linkleri - /magazalar/{id} formatında
         safeText = safeText.replace(/\[\[MAGAZA:(\d+)\]\]/g, function (m, id) {
-            return '<a href="/magazalar?magazaId=' + id + '" class="ai-product-link ai-store-link" target="_blank">🏪 Mağazaya Git</a>';
+            return '<a href="/magazalar/' + id + '" class="ai-product-link ai-store-link" target="_blank">🏪 Mağazaya Git</a>';
         });
 
         // Kategori Linkleri

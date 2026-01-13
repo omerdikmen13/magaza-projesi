@@ -80,7 +80,11 @@
                 <div th:each="urun : ${urunler}" class="product-card">
                     <div
                         style="height: 200px; background: linear-gradient(135deg, var(--gray-200) 0%, var(--gray-300) 100%); display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                        <i class="fas fa-tshirt"
+                        <!-- Gerçek resim varsa göster -->
+                        <img th:if="${urun.resimUrl != null and !urun.resimUrl.isEmpty()}" th:src="${urun.resimUrl}"
+                            th:alt="${urun.ad}" style="width: 100%; height: 100%; object-fit: cover;">
+                        <!-- Resim yoksa icon göster -->
+                        <i th:if="${urun.resimUrl == null or urun.resimUrl.isEmpty()}" class="fas fa-tshirt"
                             style="font-size: 4rem; color: var(--primary-color); opacity: 0.7;"></i>
                     </div>
 
