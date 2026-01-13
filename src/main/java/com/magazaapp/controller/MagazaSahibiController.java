@@ -437,7 +437,7 @@ public class MagazaSahibiController {
         }
 
         // ============ SİPARİŞ DURUMU GÜNCELLE ============
-        @PostMapping({ "/siparis/{id}/durum", "/siparis/{id}/guncelle" })
+        @PostMapping({ "/siparis/{id}/durum", "/siparis/{id}/guncelle", "/siparis/{id}/durum-guncelle" })
         public String siparisDurumuGuncelle(@PathVariable Long id,
                         @RequestParam String durum,
                         Authentication auth,
