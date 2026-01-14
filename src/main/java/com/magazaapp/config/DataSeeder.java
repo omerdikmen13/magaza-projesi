@@ -448,230 +448,270 @@ public class DataSeeder {
 
                         // LCW EK ÜRÜNLER
                         createUrun(urunRepository, "LCW Basic Tişört", "119.99", lcw, erkekTisort, "Basic tişört",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500");
                         createUrun(urunRepository, "LCW Baskılı Tişört", "129.99", lcw, erkekTisort, "Baskılı tişört",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500");
                         createUrun(urunRepository, "LCW Oxford Gömlek", "269.99", lcw, erkekGomlek, "Oxford gömlek",
-                                        "Açık Mavi");
+                                        "Açık Mavi",
+                                        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500");
                         createUrun(urunRepository, "LCW Keten Gömlek", "289.99", lcw, erkekGomlek, "Keten gömlek",
-                                        "Bej");
-                        createUrun(urunRepository, "LCW Triko Kazak", "299.99", lcw, erkekKazak, "Triko kazak", "Gri");
+                                        "Bej", "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500");
+                        createUrun(urunRepository, "LCW Triko Kazak", "299.99", lcw, erkekKazak, "Triko kazak", "Gri",
+                                        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "LCW Boğazlı Kazak", "319.99", lcw, erkekKazak, "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "LCW Slim Pantolon", "329.99", lcw, erkekPantolon, "Slim pantolon",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1542272617-08f08630329e?w=500");
                         createUrun(urunRepository, "LCW Kargo Pantolon", "339.99", lcw, erkekPantolon, "Kargo pantolon",
-                                        "Haki");
+                                        "Haki", "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=500");
                         createUrun(urunRepository, "LCW Günlük Elbise", "299.99", lcw, kadinElbise, "Günlük elbise",
-                                        "Yeşil");
+                                        "Yeşil", "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500");
                         createUrun(urunRepository, "LCW Desenli Elbise", "319.99", lcw, kadinElbise, "Desenli elbise",
-                                        "Pembe");
-                        createUrun(urunRepository, "LCW Pamuk Bluz", "159.99", lcw, kadinBluz, "Pamuk bluz", "Beyaz");
-                        createUrun(urunRepository, "LCW Şifon Bluz", "179.99", lcw, kadinBluz, "Şifon bluz", "Bordo");
-                        createUrun(urunRepository, "LCW Midi Etek", "219.99", lcw, kadinEtek, "Midi etek", "Siyah");
-                        createUrun(urunRepository, "LCW Pileli Etek", "239.99", lcw, kadinEtek, "Pileli etek", "Bej");
+                                        "Pembe", "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=500");
+                        createUrun(urunRepository, "LCW Pamuk Bluz", "159.99", lcw, kadinBluz, "Pamuk bluz", "Beyaz",
+                                        "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500");
+                        createUrun(urunRepository, "LCW Şifon Bluz", "179.99", lcw, kadinBluz, "Şifon bluz", "Bordo",
+                                        "https://images.unsplash.com/photo-1551163943-3f6a855d1153?w=500");
+                        createUrun(urunRepository, "LCW Midi Etek", "219.99", lcw, kadinEtek, "Midi etek", "Siyah",
+                                        "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500");
+                        createUrun(urunRepository, "LCW Pileli Etek", "239.99", lcw, kadinEtek, "Pileli etek", "Bej",
+                                        "https://images.unsplash.com/photo-1591189863430-ab87e120f298?w=500");
                         createUrun(urunRepository, "LCW Kadın Triko Kazak", "279.99", lcw, kadinKazak, "Triko kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "LCW Kadın Boğazlı Kazak", "299.99", lcw, kadinKazak,
                                         "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "LCW Çocuk Pantolon", "149.99", lcw, cocukPantolon, "Çocuk pantolon",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
                         createUrun(urunRepository, "LCW Çocuk Jean", "169.99", lcw, cocukPantolon, "Çocuk jean",
-                                        "Mavi");
+                                        "Mavi", "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500");
                         createUrun(urunRepository, "LCW Çocuk Baskılı Tişört", "99.99", lcw, cocukTisort,
-                                        "Baskılı tişört", "Sarı");
+                                        "Baskılı tişört", "Sarı",
+                                        "https://images.unsplash.com/photo-1519238809117-22b2ff150034?w=500");
                         createUrun(urunRepository, "LCW Çocuk Fermuarlı Sweatshirt", "179.99", lcw, cocukSweatshirt,
-                                        "Fermuarlı sweatshirt", "Lacivert");
+                                        "Fermuarlı sweatshirt", "Lacivert",
+                                        "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
 
                         // DEFACTO EK ÜRÜNLER
                         createUrun(urunRepository, "DeFacto Basic Tişört", "129.99", defacto, erkekTisort,
                                         "Basic pamuk tişört",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500");
                         createUrun(urunRepository, "DeFacto Oversize Tişört", "149.99", defacto, erkekTisort,
                                         "Oversize tişört",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "DeFacto Oxford Gömlek", "299.99", defacto, erkekGomlek,
                                         "Oxford gömlek",
-                                        "Açık Mavi");
+                                        "Açık Mavi",
+                                        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500");
                         createUrun(urunRepository, "DeFacto Keten Gömlek", "319.99", defacto, erkekGomlek,
-                                        "Keten gömlek", "Bej");
+                                        "Keten gömlek", "Bej",
+                                        "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500");
                         createUrun(urunRepository, "DeFacto Triko Kazak", "319.99", defacto, erkekKazak, "Triko kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "DeFacto Boğazlı Kazak", "339.99", defacto, erkekKazak,
                                         "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "DeFacto Slim Pantolon", "349.99", defacto, erkekPantolon,
                                         "Slim pantolon",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1542272617-08f08630329e?w=500");
                         createUrun(urunRepository, "DeFacto Kargo Pantolon", "369.99", defacto, erkekPantolon,
                                         "Kargo pantolon",
-                                        "Haki");
+                                        "Haki", "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=500");
                         createUrun(urunRepository, "DeFacto Günlük Elbise", "309.99", defacto, kadinElbise,
                                         "Günlük elbise",
-                                        "Yeşil");
+                                        "Yeşil", "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500");
                         createUrun(urunRepository, "DeFacto Saten Elbise", "359.99", defacto, kadinElbise,
-                                        "Saten elbise", "Siyah");
+                                        "Saten elbise", "Siyah",
+                                        "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500");
                         createUrun(urunRepository, "DeFacto Pamuk Bluz", "159.99", defacto, kadinBluz, "Pamuk bluz",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500");
                         createUrun(urunRepository, "DeFacto Şifon Bluz", "179.99", defacto, kadinBluz, "Şifon bluz",
-                                        "Bordo");
+                                        "Bordo", "https://images.unsplash.com/photo-1551163943-3f6a855d1153?w=500");
                         createUrun(urunRepository, "DeFacto Midi Etek", "239.99", defacto, kadinEtek, "Midi etek",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500");
                         createUrun(urunRepository, "DeFacto Denim Etek", "259.99", defacto, kadinEtek, "Denim etek",
-                                        "Mavi");
+                                        "Mavi", "https://images.unsplash.com/photo-1591189863430-ab87e120f298?w=500");
                         createUrun(urunRepository, "DeFacto Kadın Triko Kazak", "299.99", defacto, kadinKazak,
                                         "Triko kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "DeFacto Kadın Boğazlı Kazak", "329.99", defacto, kadinKazak,
                                         "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "DeFacto Çocuk Pantolon", "149.99", defacto, cocukPantolon,
                                         "Çocuk pantolon",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
                         createUrun(urunRepository, "DeFacto Çocuk Jean", "169.99", defacto, cocukPantolon, "Çocuk jean",
-                                        "Mavi");
+                                        "Mavi", "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500");
                         createUrun(urunRepository, "DeFacto Çocuk Baskılı Tişört", "89.99", defacto, cocukTisort,
                                         "Baskılı tişört",
-                                        "Sarı");
+                                        "Sarı", "https://images.unsplash.com/photo-1519238809117-22b2ff150034?w=500");
                         createUrun(urunRepository, "DeFacto Çocuk Fermuarlı Sweatshirt", "179.99", defacto,
                                         cocukSweatshirt,
-                                        "Fermuarlı sweatshirt", "Lacivert");
+                                        "Fermuarlı sweatshirt", "Lacivert",
+                                        "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
 
                         // PULL&BEAR EK ÜRÜNLER
                         createUrun(urunRepository, "Pull&Bear Basic Tişört", "159.99", pullbear, erkekTisort,
                                         "Basic tişört",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500");
                         createUrun(urunRepository, "Pull&Bear Baskılı Tişört", "179.99", pullbear, erkekTisort,
                                         "Baskılı tişört",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500");
                         createUrun(urunRepository, "Pull&Bear Oxford Gömlek", "289.99", pullbear, erkekGomlek,
                                         "Oxford gömlek",
-                                        "Açık Mavi");
+                                        "Açık Mavi",
+                                        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500");
                         createUrun(urunRepository, "Pull&Bear Keten Gömlek", "309.99", pullbear, erkekGomlek,
                                         "Keten gömlek",
-                                        "Bej");
+                                        "Bej", "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500");
                         createUrun(urunRepository, "Pull&Bear Triko Kazak", "329.99", pullbear, erkekKazak,
-                                        "Triko kazak", "Gri");
+                                        "Triko kazak", "Gri",
+                                        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "Pull&Bear Boğazlı Kazak", "349.99", pullbear, erkekKazak,
                                         "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "Pull&Bear Slim Pantolon", "399.99", pullbear, erkekPantolon,
                                         "Slim pantolon",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1542272617-08f08630329e?w=500");
                         createUrun(urunRepository, "Pull&Bear Kargo Pantolon", "419.99", pullbear, erkekPantolon,
                                         "Kargo pantolon",
-                                        "Haki");
+                                        "Haki", "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=500");
                         createUrun(urunRepository, "Pull&Bear Günlük Elbise", "309.99", pullbear, kadinElbise,
                                         "Günlük elbise",
-                                        "Yeşil");
+                                        "Yeşil", "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500");
                         createUrun(urunRepository, "Pull&Bear Parti Elbisesi", "349.99", pullbear, kadinElbise,
-                                        "Şık parti elbisesi", "Siyah");
+                                        "Şık parti elbisesi", "Siyah",
+                                        "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500");
                         createUrun(urunRepository, "Pull&Bear Pamuk Bluz", "149.99", pullbear, kadinBluz, "Pamuk bluz",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500");
                         createUrun(urunRepository, "Pull&Bear Crop Bluz", "159.99", pullbear, kadinBluz, "Crop bluz",
-                                        "Bordo");
+                                        "Bordo", "https://images.unsplash.com/photo-1551163943-3f6a855d1153?w=500");
                         createUrun(urunRepository, "Pull&Bear Midi Etek", "259.99", pullbear, kadinEtek, "Midi etek",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500");
                         createUrun(urunRepository, "Pull&Bear Denim Etek", "279.99", pullbear, kadinEtek, "Denim etek",
-                                        "Mavi");
+                                        "Mavi", "https://images.unsplash.com/photo-1591189863430-ab87e120f298?w=500");
                         createUrun(urunRepository, "Pull&Bear Kadın Triko Kazak", "319.99", pullbear, kadinKazak,
                                         "Triko kazak",
-                                        "Bej");
+                                        "Bej", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "Pull&Bear Kadın Boğazlı Kazak", "339.99", pullbear, kadinKazak,
                                         "Boğazlı kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "Pull&Bear Çocuk Pantolon", "179.99", pullbear, cocukPantolon,
                                         "Çocuk pantolon",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
                         createUrun(urunRepository, "Pull&Bear Çocuk Jean", "199.99", pullbear, cocukPantolon,
-                                        "Çocuk jean", "Mavi");
+                                        "Çocuk jean", "Mavi",
+                                        "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500");
                         createUrun(urunRepository, "Pull&Bear Çocuk Baskılı Tişört", "129.99", pullbear, cocukTisort,
-                                        "Baskılı tişört", "Sarı");
+                                        "Baskılı tişört", "Sarı",
+                                        "https://images.unsplash.com/photo-1519238809117-22b2ff150034?w=500");
                         createUrun(urunRepository, "Pull&Bear Çocuk Fermuarlı Sweatshirt", "209.99", pullbear,
                                         cocukSweatshirt,
-                                        "Fermuarlı sweatshirt", "Lacivert");
+                                        "Fermuarlı sweatshirt", "Lacivert",
+                                        "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
 
                         // ZARA EK ÜRÜNLER
                         createUrun(urunRepository, "Zara Basic Tişört", "249.99", zara, erkekTisort,
                                         "Basic premium tişört",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500");
                         createUrun(urunRepository, "Zara Baskılı Tişört", "269.99", zara, erkekTisort,
                                         "Baskılı premium tişört",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500");
                         createUrun(urunRepository, "Zara Oxford Gömlek", "479.99", zara, erkekGomlek, "Oxford gömlek",
-                                        "Açık Mavi");
+                                        "Açık Mavi",
+                                        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500");
                         createUrun(urunRepository, "Zara Keten Gömlek", "499.99", zara, erkekGomlek, "Keten gömlek",
-                                        "Bej");
+                                        "Bej", "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500");
                         createUrun(urunRepository, "Zara Triko Kazak", "629.99", zara, erkekKazak, "Triko kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "Zara Boğazlı Kazak", "649.99", zara, erkekKazak, "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "Zara Slim Pantolon", "549.99", zara, erkekPantolon,
                                         "Slim kumaş pantolon",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1542272617-08f08630329e?w=500");
                         createUrun(urunRepository, "Zara Kargo Pantolon", "569.99", zara, erkekPantolon,
-                                        "Kargo pantolon", "Haki");
+                                        "Kargo pantolon", "Haki",
+                                        "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=500");
                         createUrun(urunRepository, "Zara Günlük Elbise", "629.99", zara, kadinElbise, "Günlük elbise",
-                                        "Yeşil");
+                                        "Yeşil", "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500");
                         createUrun(urunRepository, "Zara Saten Elbise", "699.99", zara, kadinElbise, "Saten elbise",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500");
                         createUrun(urunRepository, "Zara Pamuk Bluz", "429.99", zara, kadinBluz, "Pamuklu bluz",
-                                        "Beyaz");
-                        createUrun(urunRepository, "Zara İpek Bluz", "499.99", zara, kadinBluz, "İpek bluz", "Bordo");
-                        createUrun(urunRepository, "Zara Midi Etek", "399.99", zara, kadinEtek, "Midi etek", "Siyah");
-                        createUrun(urunRepository, "Zara Denim Etek", "419.99", zara, kadinEtek, "Denim etek", "Mavi");
+                                        "Beyaz", "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500");
+                        createUrun(urunRepository, "Zara İpek Bluz", "499.99", zara, kadinBluz, "İpek bluz", "Bordo",
+                                        "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500");
+                        createUrun(urunRepository, "Zara Midi Etek", "399.99", zara, kadinEtek, "Midi etek", "Siyah",
+                                        "https://images.unsplash.com/photo-1583496661160-fb5886a0aaaa?w=500");
+                        createUrun(urunRepository, "Zara Denim Etek", "419.99", zara, kadinEtek, "Denim etek", "Mavi",
+                                        "https://images.unsplash.com/photo-1591189863430-ab87e120f298?w=500");
                         createUrun(urunRepository, "Zara Kadın Triko Kazak", "699.99", zara, kadinKazak, "Triko kazak",
-                                        "Bej");
+                                        "Bej", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "Zara Kaşmir Kazak", "899.99", zara, kadinKazak, "Kaşmir kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "Zara Çocuk Pantolon", "269.99", zara, cocukPantolon,
-                                        "Çocuk pantolon", "Gri");
+                                        "Çocuk pantolon", "Gri",
+                                        "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
                         createUrun(urunRepository, "Zara Çocuk Jean", "299.99", zara, cocukPantolon, "Çocuk jean",
-                                        "Mavi");
+                                        "Mavi", "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500");
                         createUrun(urunRepository, "Zara Çocuk Baskılı Tişört", "199.99", zara, cocukTisort,
                                         "Baskılı tişört",
-                                        "Sarı");
+                                        "Sarı", "https://images.unsplash.com/photo-1519238809117-22b2ff150034?w=500");
                         createUrun(urunRepository, "Zara Çocuk Fermuarlı Sweatshirt", "279.99", zara, cocukSweatshirt,
-                                        "Fermuarlı sweatshirt", "Lacivert");
+                                        "Fermuarlı sweatshirt", "Lacivert",
+                                        "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
 
                         // H&M EK ÜRÜNLER
                         createUrun(urunRepository, "H&M Oversize Tişört", "129.99", hm, erkekTisort, "Oversize tişört",
-                                        "Siyah");
+                                        "Siyah", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "H&M Baskılı Tişört", "119.99", hm, erkekTisort, "Baskılı tişört",
-                                        "Beyaz");
+                                        "Beyaz", "https://images.unsplash.com/photo-1503341504253-dff4815485f1?w=500");
                         createUrun(urunRepository, "H&M Oxford Gömlek", "249.99", hm, erkekGomlek, "Oxford gömlek",
-                                        "Açık Mavi");
+                                        "Açık Mavi",
+                                        "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?w=500");
                         createUrun(urunRepository, "H&M Keten Gömlek", "269.99", hm, erkekGomlek, "Keten gömlek",
-                                        "Bej");
+                                        "Bej", "https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500");
                         createUrun(urunRepository, "H&M Boğazlı Kazak", "299.99", hm, erkekKazak, "Boğazlı kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "H&M Fermuarlı Kazak", "319.99", hm, erkekKazak, "Fermuarlı kazak",
-                                        "Lacivert");
+                                        "Lacivert", "https://images.unsplash.com/photo-1556821840-3a63f95609a7?w=500");
                         createUrun(urunRepository, "H&M Kargo Pantolon", "379.99", hm, erkekPantolon, "Kargo pantolon",
-                                        "Haki");
+                                        "Haki", "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=500");
                         createUrun(urunRepository, "H&M Jogger Pantolon", "359.99", hm, erkekPantolon,
-                                        "Jogger pantolon", "Siyah");
+                                        "Jogger pantolon", "Siyah",
+                                        "https://images.unsplash.com/photo-1552902865-b72c031ac5ea?w=500");
                         createUrun(urunRepository, "H&M Desenli Elbise", "329.99", hm, kadinElbise, "Desenli elbise",
-                                        "Pembe");
+                                        "Pembe", "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=500");
                         createUrun(urunRepository, "H&M Saten Elbise", "379.99", hm, kadinElbise, "Saten elbise",
-                                        "Siyah");
-                        createUrun(urunRepository, "H&M V Yaka Bluz", "169.99", hm, kadinBluz, "V yaka bluz", "Beyaz");
-                        createUrun(urunRepository, "H&M Şifon Bluz", "189.99", hm, kadinBluz, "Şifon bluz", "Bordo");
-                        createUrun(urunRepository, "H&M Pileli Etek", "249.99", hm, kadinEtek, "Pileli etek", "Bej");
-                        createUrun(urunRepository, "H&M Denim Etek", "269.99", hm, kadinEtek, "Denim etek", "Mavi");
+                                        "Siyah", "https://images.unsplash.com/photo-1509631179647-0177331693ae?w=500");
+                        createUrun(urunRepository, "H&M V Yaka Bluz", "169.99", hm, kadinBluz, "V yaka bluz", "Beyaz",
+                                        "https://images.unsplash.com/photo-1564257631407-4deb1f99d992?w=500");
+                        createUrun(urunRepository, "H&M Şifon Bluz", "189.99", hm, kadinBluz, "Şifon bluz", "Bordo",
+                                        "https://images.unsplash.com/photo-1551163943-3f6a855d1153?w=500");
+                        createUrun(urunRepository, "H&M Pileli Etek", "249.99", hm, kadinEtek, "Pileli etek", "Bej",
+                                        "https://images.unsplash.com/photo-1591189863430-ab87e120f298?w=500");
+                        createUrun(urunRepository, "H&M Denim Etek", "269.99", hm, kadinEtek, "Denim etek", "Mavi",
+                                        "https://images.unsplash.com/photo-1591189863430-ab87e120f298?w=500");
                         createUrun(urunRepository, "H&M Kadın Triko Kazak", "299.99", hm, kadinKazak, "Triko kazak",
-                                        "Gri");
+                                        "Gri", "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=500");
                         createUrun(urunRepository, "H&M Kadın Boğazlı Kazak", "319.99", hm, kadinKazak, "Boğazlı kazak",
-                                        "Lacivert");
+                                        "Lacivert",
+                                        "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?w=500");
                         createUrun(urunRepository, "H&M Çocuk Pantolon", "159.99", hm, cocukPantolon, "Çocuk pantolon",
-                                        "Gri");
-                        createUrun(urunRepository, "H&M Çocuk Jean", "179.99", hm, cocukPantolon, "Çocuk jean", "Mavi");
+                                        "Gri", "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
+                        createUrun(urunRepository, "H&M Çocuk Jean", "179.99", hm, cocukPantolon, "Çocuk jean", "Mavi",
+                                        "https://images.unsplash.com/photo-1622290291468-a28f7a7dc6a8?w=500");
                         createUrun(urunRepository, "H&M Çocuk Baskılı Tişört", "89.99", hm, cocukTisort,
                                         "Baskılı çocuk tişört",
-                                        "Sarı");
+                                        "Sarı", "https://images.unsplash.com/photo-1519238809117-22b2ff150034?w=500");
                         createUrun(urunRepository, "H&M Çocuk Fermuarlı Sweatshirt", "189.99", hm, cocukSweatshirt,
-                                        "Fermuarlı sweatshirt", "Lacivert");
+                                        "Fermuarlı sweatshirt", "Lacivert",
+                                        "https://images.unsplash.com/photo-1519238263496-d21afce7102d?w=500");
 
                         System.out.println(">>> 210 Ürün eklendi (Her mağazadan 30 ürün)");
 
