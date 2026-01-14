@@ -7,10 +7,6 @@
     "icon": "./assets/images/icon.png",
     "scheme": "magazamobil",
     "userInterfaceStyle": "automatic",
-    "runtimeVersion": {
-      "policy": "nativeVersion"
-    },
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/splash-icon.png",
       "resizeMode": "contain",
@@ -23,9 +19,7 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      }
     },
     "web": {
       "bundler": "metro",
@@ -38,13 +32,9 @@
     "experiments": {
       "typedRoutes": true
     },
-    "updates": {
-      "enabled": false,
-      "checkAutomatically": "ON_ERROR_RECOVERY",
-      "fallbackToCacheTimeout": 0
-    },
     "extra": {
-      "apiUrl": "http://13.60.76.224:8080"
+      "apiUrl": "http://13.60.76.224:8080",
+      "router": {}
     }
   }
 }
