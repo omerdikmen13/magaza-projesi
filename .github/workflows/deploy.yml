@@ -1,12 +1,12 @@
-name: Deploy to EC2
+name: Deploy to AWS EC2 (Full Stack)
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
     
     steps:
@@ -20,7 +20,7 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
-    - name: Build with Maven
+    - name: Build Spring Boot JAR
       run: mvn clean package -DskipTests
     
     - name: Setup SSH Key
@@ -30,18 +30,66 @@ jobs:
         chmod 600 ~/.ssh/ec2_key.pem
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
     
-    - name: Deploy JAR to EC2
+    - name: Deploy Spring Boot to EC2
       run: |
         scp -i ~/.ssh/ec2_key.pem \
           target/magaza-projesi-0.0.1-SNAPSHOT.jar \
-          ubuntu@${{ secrets.EC2_HOST }}:~/
+          ubuntu@${{ secrets.EC2_HOST }}:~/app.jar
     
-    - name: Restart Application on EC2
+    - name: Deploy Python Email Microservice to EC2
+      run: |
+        scp -i ~/.ssh/ec2_key.pem -r \
+          email-microservice/ \
+          ubuntu@${{ secrets.EC2_HOST }}:~/email-microservice/
+    
+    - name: Restart All Services on EC2
       run: |
         ssh -i ~/.ssh/ec2_key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-          sudo systemctl restart magazaapp
+          # Python Email Microservice restart
+          echo "🐍 Python Email Microservice yeniden baslatiliyor..."
+          cd ~/email-microservice
+          
+          # Kill old process
+          pkill -f "uvicorn main:app" || true
+          
+          # Install dependencies
+          pip3 install -r requirements.txt --quiet
+          
+          # Start with nohup (background)
+          nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > email.log 2>&1 &
+          
+          # Wait and check
+          sleep 3
+          if pgrep -f "uvicorn main:app" > /dev/null; then
+            echo "✅ Python Email Microservice calisiyor (Port 8000)"
+          else
+            echo "❌ Python Email Microservice baslatilamadi!"
+            cat email.log
+          fi
+          
+          # Spring Boot restart
+          echo "☕ Spring Boot yeniden baslatiliyor..."
+          cd ~
+          
+          # Kill old Java process
+          pkill -f "java -jar app.jar" || true
+          
+          # Start with nohup
+          nohup java -jar app.jar --server.port=8080 > springboot.log 2>&1 &
+          
+          # Wait and check
           sleep 10
-          sudo systemctl status magazaapp
+          if pgrep -f "java -jar app.jar" > /dev/null; then
+            echo "✅ Spring Boot calisiyor (Port 8080)"
+          else
+            echo "❌ Spring Boot baslatilamadi!"
+            tail -50 springboot.log
+          fi
+          
+          echo ""
+          echo "📊 Servis Durumu:"
+          echo "Python: http://${{ secrets.EC2_HOST }}:8000"
+          echo "Spring: http://${{ secrets.EC2_HOST }}:8080"
         EOF
     
     - name: Cleanup SSH Key
