@@ -13,11 +13,14 @@ public class KullaniciService {
 
     private final KullaniciRepository kullaniciRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
     public KullaniciService(KullaniciRepository kullaniciRepository,
-            PasswordEncoder passwordEncoder) {
+            PasswordEncoder passwordEncoder,
+            EmailService emailService) {
         this.kullaniciRepository = kullaniciRepository;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     /**
@@ -150,7 +153,14 @@ public class KullaniciService {
         kullanici.setSoyad(soyad);
         kullanici.setRol(rol);
 
-        return kullaniciRepository.save(kullanici);
+        Kullanici kaydedilen = kullaniciRepository.save(kullanici);
+
+        // ✅ HOŞGELDİN MAİLİ GÖNDER (Async - ana işlemi bekletmez)
+        if (email != null && !email.isEmpty()) {
+            emailService.hosgeldinMailiGonder(kaydedilen);
+        }
+
+        return kaydedilen;
     }
 
     /**

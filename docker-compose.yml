@@ -1,0 +1,78 @@
+version: '3.8'
+
+services:
+  # Spring Boot Backend
+  springboot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/magazadb?createDatabaseIfNotExist=true&useSSL=false&serverTimezone=UTC
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - EMAIL_MICROSERVICE_URL=http://python-email:8000
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_S3_BUCKET_NAME=${AWS_S3_BUCKET_NAME}
+      - AWS_S3_REGION=${AWS_S3_REGION}
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - mysql
+      - python-email
+    restart: always
+    networks:
+      - app-network
+
+  # Python Email Microservice
+  python-email:
+    build:
+      context: ./email-microservice
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - MAIL_HOST=smtp.gmail.com
+      - MAIL_PORT=587
+      - MAIL_USER=${GMAIL_USER}
+      - MAIL_PASS=${GMAIL_APP_PASSWORD}
+    restart: always
+    networks:
+      - app-network
+
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_DATABASE=magazadb
+    volumes:
+      - mysql_data:/var/lib/mysql
+    restart: always
+    networks:
+      - app-network
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - springboot
+    restart: always
+    networks:
+      - app-network
+
+volumes:
+  mysql_data:
+
+networks:
+  app-network:
+    driver: bridge

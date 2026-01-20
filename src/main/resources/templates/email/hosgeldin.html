@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hoş Geldiniz</title>
+</head>
+
+<body style="font-family: Arial, sans-serif; background-color: #f4f4f4; margin: 0; padding: 20px;">
+    <div
+        style="max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">🎉 Hoş Geldiniz!</h1>
+        </div>
+
+        <!-- Content -->
+        <div style="padding: 30px;">
+            <p style="font-size: 18px; color: #333;">
+                Merhaba <strong th:text="${ad}">Kullanıcı</strong>,
+            </p>
+
+            <p style="color: #666; line-height: 1.6;">
+                Mağaza Sistemimize kayıt olduğunuz için teşekkür ederiz!
+                Artık yüzlerce mağazada alışveriş yapabilir, favorilerinizi takip edebilir
+                ve özel fırsatlardan yararlanabilirsiniz.
+            </p>
+
+            <div style="background: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <h3 style="margin-top: 0; color: #667eea;">📋 Hesap Bilgileriniz</h3>
+                <p style="margin: 5px 0;"><strong>Kullanıcı Adı:</strong> <span
+                        th:text="${kullaniciAdi}">username</span></p>
+                <p style="margin: 5px 0;"><strong>Email:</strong> <span th:text="${email}">email@example.com</span></p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="http://localhost:8080/" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                          color: white; 
+                          padding: 15px 40px; 
+                          text-decoration: none; 
+                          border-radius: 25px; 
+                          font-weight: bold;
+                          display: inline-block;">
+                    🛒 Alışverişe Başla
+                </a>
+            </div>
+
+            <div style="background: #e8f5e9; border-radius: 8px; padding: 15px; margin-top: 20px;">
+                <p style="margin: 0; color: #2e7d32; font-size: 14px;">
+                    💡 <strong>İpucu:</strong> Favori ürünlerinizi takip edin, indirimlerden haberdar olun!
+                </p>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="background: #f8f9fa; padding: 20px; text-align: center; border-top: 1px solid #eee;">
+            <p style="color: #999; font-size: 12px; margin: 0;">
+                © 2026 Mağaza Sistemi | Bu mail otomatik olarak gönderilmiştir.
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

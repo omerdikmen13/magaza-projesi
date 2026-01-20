@@ -1,11 +1,14 @@
 package com.magazaapp.service;
 
+import com.magazaapp.dto.SiparisOzetiDTO;
 import com.magazaapp.model.*;
 import com.magazaapp.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -16,17 +19,20 @@ public class SiparisService {
     private final SepetRepository sepetRepository;
     private final UrunStokRepository urunStokRepository;
     private final KullaniciRepository kullaniciRepository;
+    private final EmailService emailService;
 
     public SiparisService(SiparisFisiRepository siparisFisiRepository,
             SiparisDetayRepository siparisDetayRepository,
             SepetRepository sepetRepository,
             UrunStokRepository urunStokRepository,
-            KullaniciRepository kullaniciRepository) {
+            KullaniciRepository kullaniciRepository,
+            EmailService emailService) {
         this.siparisFisiRepository = siparisFisiRepository;
         this.siparisDetayRepository = siparisDetayRepository;
         this.sepetRepository = sepetRepository;
         this.urunStokRepository = urunStokRepository;
         this.kullaniciRepository = kullaniciRepository;
+        this.emailService = emailService;
     }
 
     /**
@@ -106,8 +112,48 @@ public class SiparisService {
         // Sepeti boşalt
         sepetRepository.deleteByKullaniciId(kullanici.getId());
 
+        // ✅ SİPARİŞ ÖZETİ MAİLİ GÖNDER
+        if (kullanici.getEmail() != null && !kullanici.getEmail().isEmpty()) {
+            // Sipariş detaylarını al
+            List<SiparisDetay> detaylar = siparisDetayRepository.findBySiparisFisiId(siparisFisi.getId());
+            SiparisOzetiDTO ozet = siparisOzetiOlustur(siparisFisi, detaylar);
+            emailService.siparisOzetiMailiGonder(ozet);
+        }
+
         return SiparisResult.basarili("Siparişiniz başarıyla oluşturuldu! Sipariş No: #" + siparisFisi.getId(),
                 siparisFisi.getId());
+    }
+
+    /**
+     * Sipariş özeti DTO oluştur (private helper)
+     */
+    private SiparisOzetiDTO siparisOzetiOlustur(SiparisFisi fisi, List<SiparisDetay> detaylar) {
+        SiparisOzetiDTO ozet = new SiparisOzetiDTO();
+        ozet.setSiparisId(fisi.getId());
+
+        String musteriAd = (fisi.getKullanici().getAd() != null ? fisi.getKullanici().getAd() : "") +
+                " " +
+                (fisi.getKullanici().getSoyad() != null ? fisi.getKullanici().getSoyad() : "");
+        ozet.setMusteriAd(musteriAd.trim().isEmpty() ? fisi.getKullanici().getKullaniciAdi() : musteriAd.trim());
+        ozet.setMusteriEmail(fisi.getKullanici().getEmail());
+        ozet.setMagazaAd(fisi.getMagaza().getAd());
+        ozet.setToplamTutar(fisi.getToplamTutar());
+        ozet.setTeslimatAdresi(fisi.getTeslimatAdresi());
+        ozet.setSiparisTarihi(fisi.getSiparisTarihi().format(
+                DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")));
+
+        List<SiparisOzetiDTO.SiparisKalemiDTO> kalemler = new ArrayList<>();
+        for (SiparisDetay d : detaylar) {
+            kalemler.add(new SiparisOzetiDTO.SiparisKalemiDTO(
+                    d.getUrun().getAd(),
+                    d.getBeden().getAd(),
+                    d.getAdet(),
+                    d.getBirimFiyat(),
+                    d.getBirimFiyat().multiply(BigDecimal.valueOf(d.getAdet()))));
+        }
+        ozet.setKalemler(kalemler);
+
+        return ozet;
     }
 
     /**
