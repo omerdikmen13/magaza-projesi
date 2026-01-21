@@ -36,43 +36,18 @@ jobs:
           target/magaza-projesi-0.0.1-SNAPSHOT.jar \
           ubuntu@${{ secrets.EC2_HOST }}:~/app.jar
     
-    - name: Deploy Python Email Microservice to EC2
+    - name: Restart Spring Boot on EC2
       run: |
-        scp -i ~/.ssh/ec2_key.pem -r \
-          email-microservice/ \
-          ubuntu@${{ secrets.EC2_HOST }}:~/email-microservice/
-    
-    - name: Restart All Services on EC2
-      run: |
-        ssh -i ~/.ssh/ec2_key.pem ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
-          # Python Email Microservice restart
-          echo "🐍 Python Email Microservice yeniden baslatiliyor..."
-          cd ~/email-microservice
+        ssh -T -i ~/.ssh/ec2_key.pem -o StrictHostKeyChecking=no ubuntu@${{ secrets.EC2_HOST }} << 'EOF'
+          echo "=========================================="
+          echo " Spring Boot Deploy"
+          echo "=========================================="
           
-          # Kill old process
-          pkill -f "uvicorn main:app" || true
-          
-          # Install dependencies
-          pip3 install -r requirements.txt --quiet
-          
-          # Start with nohup (background)
-          nohup python3 -m uvicorn main:app --host 0.0.0.0 --port 8000 > email.log 2>&1 &
-          
-          # Wait and check
-          sleep 3
-          if pgrep -f "uvicorn main:app" > /dev/null; then
-            echo "✅ Python Email Microservice calisiyor (Port 8000)"
-          else
-            echo "❌ Python Email Microservice baslatilamadi!"
-            cat email.log
-          fi
-          
-          # Spring Boot restart
-          echo "☕ Spring Boot yeniden baslatiliyor..."
           cd ~
           
           # Kill old Java process
           pkill -f "java -jar app.jar" || true
+          sleep 2
           
           # Start with nohup
           nohup java -jar app.jar --server.port=8080 > springboot.log 2>&1 &
@@ -80,16 +55,15 @@ jobs:
           # Wait and check
           sleep 10
           if pgrep -f "java -jar app.jar" > /dev/null; then
-            echo "✅ Spring Boot calisiyor (Port 8080)"
+            echo "=========================================="
+            echo " Spring Boot BASARILI (Port 8080)"
+            echo " Email Microservice: http://16.16.197.152:8000"
+            echo "=========================================="
           else
-            echo "❌ Spring Boot baslatilamadi!"
+            echo "HATA: Spring Boot baslatilamadi!"
             tail -50 springboot.log
+            exit 1
           fi
-          
-          echo ""
-          echo "📊 Servis Durumu:"
-          echo "Python: http://${{ secrets.EC2_HOST }}:8000"
-          echo "Spring: http://${{ secrets.EC2_HOST }}:8080"
         EOF
     
     - name: Cleanup SSH Key
