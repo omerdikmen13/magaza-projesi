@@ -3,6 +3,7 @@ package com.magazaapp.controller.api;
 import com.magazaapp.model.Kullanici;
 import com.magazaapp.model.KullaniciRol;
 import com.magazaapp.repository.KullaniciRepository;
+import com.magazaapp.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +23,9 @@ public class AuthRestController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private EmailService emailService;
 
     // =============== REGISTER ===============
     @PostMapping("/register")
@@ -64,6 +68,11 @@ public class AuthRestController {
             }
 
             kullaniciRepository.save(kullanici);
+
+            // ✅ HOŞGELDİN MAİLİ GÖNDER (Async)
+            if (kullanici.getEmail() != null && !kullanici.getEmail().isEmpty()) {
+                emailService.hosgeldinMailiGonder(kullanici);
+            }
 
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Kayıt başarılı");
